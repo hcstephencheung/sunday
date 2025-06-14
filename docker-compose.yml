@@ -25,6 +25,26 @@ services:
       - ./frontend:/frontend
       - /frontend/node_modules
 
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+    volumes:
+      - ./${DEPLOY_ENV}.Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  caddy_data:
+  caddy_config:
+
 networks:
   app-network:
     driver: bridge
