@@ -14,8 +14,8 @@ import {
 const App = () => (
   <Theme>
     <Switch>
+      <Route path="/" component={CsvPage} />
       <Route path="/ocr" component={OcrPage} />
-      <Route path="/csv" component={CsvPage} />
 
       {/* Default route in a switch */}
       <Route>

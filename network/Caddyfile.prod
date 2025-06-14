@@ -1,4 +1,4 @@
-budget-helper.localhost {
+sunday.localhost {
     encode
 
 	handle /api/* {
