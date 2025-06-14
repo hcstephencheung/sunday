@@ -16,7 +16,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.${ENV}
     ports:
       - "3000:3000"
     networks:
@@ -34,7 +34,8 @@ services:
     networks:
       - app-network
     volumes:
-      - ./${DEPLOY_ENV}.Caddyfile:/etc/caddy/Caddyfile
+      - ./network/Caddyfile.${ENV}:/etc/caddy/Caddyfile
+      - ./frontend/dist:/usr/share/caddy
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
