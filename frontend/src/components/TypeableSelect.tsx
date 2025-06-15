@@ -61,8 +61,8 @@ const TypeableSelect = ({
                 <TextField.Root placeholder="Add a category..." value={textInput} onChange={handleTextInputChange} onKeyDown={handleTextInputKeydown}>
                     <TextField.Slot pl="0">
                         <SelectPrimitive.Trigger asChild>
-                            <Flex maxWidth="125px" px="2" align="center"
-                                className={classNames("items-center px-2 py-1 text-sm cursor-pointer", triggerClassNames)}
+                            <Flex maxWidth="125px" height="100%" px="2" align="center"
+                                className={classNames("items-center px-2 text-sm cursor-pointer rounded-l-(--text-field-border-radius)", triggerClassNames)}
                             >
                                 <Text truncate>
                                     {defaultOption.value}
