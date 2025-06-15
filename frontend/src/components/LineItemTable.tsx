@@ -75,7 +75,7 @@ const LineItemTable = ({
                                 onOptionsChange={handleOnOptionsChange}
                                 onSelectedOptionChange={(value) => handleSelectedCategoryChange(lineItem as CategorizedLineItem, idx, value)}
                                 triggerClassNames={lineItem.category === UNCATEGORIZED ?
-                                    ['bg-red-600', 'text-white'] : ['bg-blue-600', 'text-white']}
+                                    ['bg-(--red-9)', 'text-white'] : ['bg-(--accent-9)', 'text-white']}
                             />
                         </Table.Cell>}
                     </Table.Row>
