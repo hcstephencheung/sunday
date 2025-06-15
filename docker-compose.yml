@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   backend:
+    image: sunday-api 
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -14,6 +15,7 @@ services:
     command: uvicorn app:app --host 0.0.0.0 --port 9000 --reload
 
   frontend:
+    image: sunday-app
     build:
       context: ./frontend
       dockerfile: Dockerfile.${ENV}
