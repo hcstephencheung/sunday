@@ -23,7 +23,7 @@ jobs:
       - name: 🚀 Deploy over SSH
         run: |
           ssh -p 22122 deploy@23.111.72.198 << 'EOF'
-            cd /home/deploy/your-project
+            cd /root/dev/sunday
             git pull origin deploy
             docker compose down
             docker compose up -d --build
