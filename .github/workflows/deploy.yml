@@ -1,0 +1,30 @@
+name: 🚀 Deploy to VPS
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  deploy:
+    runs-on: debian-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p 22122 23.111.72.198 >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy over SSH
+        run: |
+          ssh -p 22122 deploy@23.111.72.198 << 'EOF'
+            cd /home/deploy/your-project
+            git pull origin deploy
+            docker compose down
+            docker compose up -d --build
+          EOF
