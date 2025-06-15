@@ -1,4 +1,4 @@
-sunday-sbox.scheung.dev {
+sunday.scheung.dev {
     encode
 
 	handle /api/* {
