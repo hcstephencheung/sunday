@@ -1,4 +1,4 @@
-sunday.localhost {
+sunday.scheung.dev {
     encode
 
 	handle /api/* {
