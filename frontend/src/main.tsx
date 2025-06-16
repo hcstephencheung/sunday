@@ -11,19 +11,27 @@ import {
 } from './pages';
 
 
-const App = () => (
-  <Theme>
-    <Switch>
-      <Route path="/" component={CsvPage} />
-      <Route path="/ocr" component={OcrPage} />
+const App = () => {
+  const hour = new Date().getHours();
+  const isDarkMode = (hour >= 7 && hour < 20) ? false : true;
+  const appearance = isDarkMode ? 'dark' : 'light';
+  const accentColor = isDarkMode ? 'jade' : 'indigo';
+  const grayColor = isDarkMode ? 'sage' : 'gray';
 
-      {/* Default route in a switch */}
-      <Route>
-        <FourOhFourPage />
-      </Route>
-    </Switch>
-  </Theme>
-)
+  return (
+    <Theme grayColor={grayColor} accentColor={accentColor} panelBackground="translucent" appearance={appearance}>
+      <Switch>
+        <Route path="/" component={CsvPage} />
+        <Route path="/ocr" component={OcrPage} />
+
+        {/* Default route in a switch */}
+        <Route>
+          <FourOhFourPage />
+        </Route>
+      </Switch>
+    </Theme>
+  )
+}
 
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);

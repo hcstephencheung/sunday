@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.radix-themes {
+  background-color: var(--amber-1);
+}
+
+.radix-themes.dark {
+    background-color: var(--sand-2);
+}
