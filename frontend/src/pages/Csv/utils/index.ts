@@ -82,6 +82,20 @@ export const tagLineItemsWithClassification = (lineItems: LineItem[], classified
     });
 }
 
+export const getCategoriesFromLineItems = (categorizedLineItems: CategorizedLineItem[]) => {
+    const categorySet = new Set<CategorizedLineItem['category']>();
+    for (const item of categorizedLineItems) {
+        categorySet.add(item.category);
+    }
+
+    return Array.from(categorySet);
+}
+
+export const mergePrimitiveArrayWithoutDuplicates = <T>(arr1: T[], arr2: T[]): T[] => {
+    const newSet = new Set<T>([...arr1, ...arr2]);
+    return Array.from(newSet);
+};
+
 export const sumCategories = (lineItems: Array<CategorizedLineItem>): Record<string, number> => {
     return lineItems.reduce((acc, item) => {
         const category = item.category;

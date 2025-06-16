@@ -1,20 +1,20 @@
 import { Cross1Icon, PlusIcon } from '@radix-ui/react-icons';
-import { Box, IconButton, Button, TextField } from '@radix-ui/themes';
+import { Box, IconButton, Button, TextField, Tooltip, Flex } from '@radix-ui/themes';
 import React from 'react';
 
 const DesiredCategories: React.FC<{
     categories: string[];
-    setCategories: (categories: string[]) => void;
-}> = ({ categories, setCategories }) => {
+    onCategoriesUpdate: (categories: string[]) => void;
+}> = ({ categories, onCategoriesUpdate }) => {
     const [input, setInput] = React.useState('');
 
     const handleRemove = (idx: number) => {
         const newArr = categories.filter((_, i) => i !== idx);
-        setCategories(Array.from(new Set(newArr)));
+        onCategoriesUpdate(Array.from(new Set(newArr)));
     };
 
     const handleRemoveAll = () => {
-        setCategories([]);
+        onCategoriesUpdate([]);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +23,7 @@ const DesiredCategories: React.FC<{
 
     const addCategory = () => {
         const sanitizedInput = input.trim().toLowerCase();
-        setCategories(Array.from(new Set([...categories, sanitizedInput])));
+        onCategoriesUpdate(Array.from(new Set([...categories, sanitizedInput])));
         setInput('');
     }
 
@@ -42,7 +42,7 @@ const DesiredCategories: React.FC<{
         <div className="mb-4">
             <div className="flex flex-wrap gap-2 mb-2">
                 {categories.map((cat, idx) => (
-                    <span key={cat} className="inline-flex items-center bg-gray-200 rounded px-2 py-1 text-sm">
+                    <span key={cat} className="inline-flex items-center bg-(--sand) rounded px-2 py-1 text-sm">
                         {cat}
                         <IconButton variant="ghost" size="1" ml="2" onClick={() => handleRemove(idx)} color="crimson">
                             <Cross1Icon />
@@ -58,9 +58,11 @@ const DesiredCategories: React.FC<{
                         </IconButton>
                     </TextField.Slot>
                     <TextField.Slot>
-                        <Button variant="ghost" onClick={handleRemoveAll} color="crimson">
-                            Clear all <Cross1Icon />
-                        </Button>
+                        <Tooltip content="Clear all">
+                            <IconButton variant="ghost" onClick={handleRemoveAll} color="crimson">
+                                <Cross1Icon />
+                            </IconButton>
+                        </Tooltip>
                     </TextField.Slot>
                 </TextField.Root>
             </Box>

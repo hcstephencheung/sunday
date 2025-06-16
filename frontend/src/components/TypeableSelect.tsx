@@ -27,7 +27,7 @@ const TypeableSelect = ({
     onSelectedOptionChange,
     triggerClassNames = '',
     annotationOptionFn,
-    selectionColor = 'indigo'
+    selectionColor = 'accent'
 }: TypeableSelectProps) => {
     const [textInput, setTextInput] = useState('');
 

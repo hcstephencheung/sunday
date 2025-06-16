@@ -1,4 +1,4 @@
-import { Heading, RadioCards, Text } from "@radix-ui/themes";
+import { Blockquote, Heading, RadioCards, Text } from "@radix-ui/themes";
 import React, { Dispatch, SetStateAction } from "react";
 import { transformScotiabankCsvToLineItem, transformTdCsvToLineItem, transformCibcCsvToLineItem } from "../pages/Csv/utils";
 
@@ -32,7 +32,13 @@ export const BankRadioCard = ({
 
     return (
         <>
-            <Heading as="h2" my="4">Select the bank before uploading CSV</Heading>
+            <Heading as="h2" mb="4" weight="light">
+                To start, export your credit card statement as CSV from your bank.
+            </Heading>
+            <Blockquote my="4">
+                Each bank formats their CSVs slightly differently, so it's important to choose
+                the correct bank before uploading your CSV.
+            </Blockquote>
             <RadioCards.Root
                 defaultValue={bank}
                 onValueChange={handleBankChange}

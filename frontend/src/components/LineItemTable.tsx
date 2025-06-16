@@ -3,6 +3,7 @@ import { Table } from '@radix-ui/themes';
 import TypeableSelect, { TypeableSelectOption } from './TypeableSelect';
 import { CategorizedLineItem, UNCATEGORIZED } from '../pages/Csv/types';
 import { parseDateString } from '../pages/Csv/utils';
+import { isEqual, noop } from 'lodash';
 
 interface LineItem {
     date: string;
@@ -18,27 +19,34 @@ const hasCategory = (lineItem: LineItem): boolean => {
 
 interface LineItemTableProps {
     lineItems: LineItem[] | CategorizedLineItem[]
-    updateLineItem?: (newLineItem: CategorizedLineItem, idx: number) => void
+    updateLineItem?: (newLineItem: CategorizedLineItem, idx: number) => void,
+    categories?: string[]
+    onCategoriesChange?: (categories: string[]) => void
 }
 const LineItemTable = ({
     lineItems,
-    updateLineItem
+    updateLineItem,
+    categories = [],
+    onCategoriesChange = () => noop
 }: LineItemTableProps) => {
-    const [allOptions, setAllOptions] = useState<TypeableSelectOption[]>([]);
-
-    useEffect(() => {
-        const allCategoriesSet = new Set();
-        if (hasCategory(lineItems[0])) {
-            lineItems.forEach(lineItem => allCategoriesSet.add(lineItem.category));
-        }
-        const allCategories = Array.from(allCategoriesSet);
-        const options = allCategories.map(category => ({ label: category, value: category } as TypeableSelectOption));
-        setAllOptions(options);
-    }, [lineItems]);
+    const options = categories.map(category => ({
+        label: category,
+        value: category
+    }))
 
     const handleOnOptionsChange = useCallback((options: TypeableSelectOption[]) => {
-        setAllOptions(options);
-    }, []);
+        const newCategorySet = new Set<string>();
+
+        for (const option of options) {
+            newCategorySet.add(option.value);
+        }
+
+        const newCategories = Array.from(newCategorySet);
+
+        if (!isEqual(categories, newCategories)) {
+            onCategoriesChange(newCategories);
+        }
+    }, [categories, onCategoriesChange]);
 
     const handleSelectedCategoryChange = useCallback((lineItem: CategorizedLineItem, idx: number, value: string) => {
         const newLineItem = {
@@ -70,7 +78,7 @@ const LineItemTable = ({
                         <Table.Cell className="px-4">{lineItem.amount}</Table.Cell>
                         {hasCategory(lineItem) && <Table.Cell className="px-4">
                             <TypeableSelect
-                                options={allOptions}
+                                options={options}
                                 defaultOption={{ label: lineItem.category, value: lineItem.category } as TypeableSelectOption}
                                 onOptionsChange={handleOnOptionsChange}
                                 onSelectedOptionChange={(value) => handleSelectedCategoryChange(lineItem as CategorizedLineItem, idx, value)}

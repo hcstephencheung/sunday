@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Heading, Button, Spinner, Tabs, Box, Flex, Container } from '@radix-ui/themes';
-import { FilePlusIcon, MagicWandIcon, ReloadIcon } from '@radix-ui/react-icons';
+import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Section } from '@radix-ui/themes';
+import { FilePlusIcon, MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import DataTable from '../../components/DataTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem } from './types';
 import { BankRadioCard, Banks, CsvTransformerByBank } from '../../components/BankRadioCard';
-import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, exportSumsToCsv, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject } from './utils';
+import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, exportSumsToCsv, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates } from './utils';
 import GlossaryTab from '../../components/GlossaryTab';
 import FileUploader from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
 import SumByCategoryTab from '../../components/SumByCategoryTab';
+import { isEmpty } from 'lodash';
 
 const CsvPage = () => {
     const params = new URLSearchParams(window.location.search);
@@ -19,9 +20,9 @@ const CsvPage = () => {
     const initialCategories = isBB !== null ? BB_CATEGORIES : DEFAULT_DESIRED_CATEGORIES;
     const [lineItems, setLineItems] = useState<LineItem[]>([]);
     const [categorizedLineItems, setCategorizedLineItems] = useState<CategorizedLineItem[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
     const [sumByCategory, setSumByCategory] = useState<Record<string, number>>({});
     const [classifying, setClassifying] = useState<boolean>(false);
-    const [desiredCategories, setDesiredCategories] = useState<string[]>(initialCategories);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
     const [glossary, setGlossary] = useState<Glossary>({})
 
@@ -66,14 +67,10 @@ const CsvPage = () => {
             const taggedLineItems = tagLineItemsWithClassification(sanitizedLineItems, sanitizedClassifiedItems);
             setCategorizedLineItems(taggedLineItems);
 
+            const categories = getCategoriesFromLineItems(taggedLineItems);
             const previousCategories = Object.entries(sanitizedClassifiedItems).map(([_, category]) => category);
-            const newCategorySet = new Set<string>();
-            for (const category of [...desiredCategories, ...previousCategories]) {
-                newCategorySet.add(category);
-            }
-            const newCategories = Array.from(newCategorySet);
-
-            setDesiredCategories(newCategories);
+            const newCategories = mergePrimitiveArrayWithoutDuplicates(categories, previousCategories);
+            setCategories(newCategories);
             setGlossary(newGlossary);
         } else {
             console.error('Please upload a valid txt file.');
@@ -88,7 +85,7 @@ const CsvPage = () => {
         // Prepare req data
         const requestBody = {
             line_items: sanitizedLineItems,
-            desired_categories: desiredCategories,
+            desired_categories: isEmpty(categories) ? initialCategories : categories,
         }
 
         // make the API call
@@ -107,8 +104,10 @@ const CsvPage = () => {
             const newGlossary = Object.assign({}, glossary, aiClassifiedItems);
 
             const taggedLineItems = tagLineItemsWithClassification(sanitizedLineItems, newGlossary);
+            const categories = getCategoriesFromLineItems(taggedLineItems);
 
             setCategorizedLineItems(taggedLineItems);
+            setCategories(categories);
         }
         setClassifying(false);
     };
@@ -123,13 +122,29 @@ const CsvPage = () => {
         const newCategorizedLineItems = [...categorizedLineItems];
         newCategorizedLineItems[idx] = newLineItem;
         setCategorizedLineItems(newCategorizedLineItems);
-    }, [categorizedLineItems]);
 
+        const newCategories = getCategoriesFromLineItems(newCategorizedLineItems);
+        // i think we can only add new categories?
+        const mergedCategories = mergePrimitiveArrayWithoutDuplicates(categories, newCategories);
+
+        setCategories(mergedCategories);
+    }, [categories, categorizedLineItems]);
+
+    const handleCategoriesChanged = React.useCallback((newCategories: string[]) => {
+        const newCategorySet = new Set<string>();
+        for (const item of [...categories, ...newCategories]) {
+            newCategorySet.add(item);
+        }
+
+        const mergedCategories = Array.from(newCategorySet);
+        setCategories(mergedCategories);
+
+    }, [categories]);
 
     // Effect to update data points when categorizedLineItems changes
     // could change from AI categorization or user updates
     React.useEffect(() => {
-        if (categorizedLineItems.length === 0 || desiredCategories.length === 0) {
+        if (categorizedLineItems.length === 0) {
             return;
         }
 
@@ -143,15 +158,15 @@ const CsvPage = () => {
         const summedCategories = sumCategories(categorizedLineItems);
         const roundedSummedCategories = sortAndSumCategories(summedCategories);
         setSumByCategory(roundedSummedCategories);
-    }, [categorizedLineItems, desiredCategories, glossary]);
+    }, [categorizedLineItems, glossary]);
 
     return (
-        <Container width="100%" p="4">
-            <Heading as="h1" size="6" mb="4">CSV solution</Heading>
-
-            <Box width="100%">
-                <DesiredCategories categories={desiredCategories} setCategories={setDesiredCategories} />
-            </Box>
+        <Container width="100%" height="100%" p="4">
+            <Heading as="h1" size="6" weight="light" mb="8">
+                <Flex gap="1" align="center">
+                    Sunday, the budgeting day <SunIcon />
+                </Flex>
+            </Heading>
 
             <Box width="100%">
                 <Box>
@@ -207,13 +222,25 @@ const CsvPage = () => {
                         <Tabs.Root defaultValue="LineItems" my="4">
                             <Tabs.List>
                                 <Tabs.Trigger value="LineItems">Line Items</Tabs.Trigger>
+                                <Tabs.Trigger value="Categories">Categories</Tabs.Trigger>
                                 <Tabs.Trigger value="SumByCategory">Sum By Category</Tabs.Trigger>
                                 <Tabs.Trigger value="Glossary">Glossary</Tabs.Trigger>
                             </Tabs.List>
 
                             <Box overflow="scroll" my="4">
                                 <Tabs.Content value="LineItems">
-                                    <LineItemTable lineItems={categorizedLineItems} updateLineItem={updateLineItem} />
+                                    <LineItemTable
+                                        lineItems={categorizedLineItems}
+                                        updateLineItem={updateLineItem}
+                                        categories={categories}
+                                        onCategoriesChange={handleCategoriesChanged}
+                                    />
+                                </Tabs.Content>
+
+                                <Tabs.Content value="Categories">
+                                    <Box width="100%">
+                                        <DesiredCategories categories={categories} onCategoriesUpdate={handleCategoriesChanged} />
+                                    </Box>
                                 </Tabs.Content>
 
                                 <Tabs.Content value="SumByCategory">
