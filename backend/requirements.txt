@@ -8,3 +8,6 @@ requests
 openai
 dotenv
 google-cloud-logging
+ocrmypdf
+PyPDF2
+python-multipart

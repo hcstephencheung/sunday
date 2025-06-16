@@ -1,7 +1,8 @@
 import json
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from utils.logger import setup_logger
 from csv_processor.pipeline import CsvProcessorPipeline
+from ocr.OCRReader import OCR
 
 from serializers.csv_serializers import ClassifyCsvResponse, ClassifyRequest
 
@@ -9,6 +10,7 @@ logger = setup_logger()
 csv_router = APIRouter(prefix="/api/csv")
 
 CsvProcessorClient = CsvProcessorPipeline()
+ocr_instance = OCR()
 
 @csv_router.get("/ping")
 async def ping():
@@ -28,4 +30,13 @@ async def classify_line_items(request: ClassifyRequest):
         return { "classified_items": classified_items }
     
     except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@csv_router.post("/pdf")
+async def classify_pdf(pdf: UploadFile = File(...)):
+    try:
+        pdf_data = await pdf.read()
+        result = ocr_instance.read(pdf_data)
+        return result
+    except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

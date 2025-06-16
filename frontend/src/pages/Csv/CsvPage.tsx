@@ -8,7 +8,7 @@ import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossar
 import { BankRadioCard, Banks, CsvTransformerByBank } from '../../components/BankRadioCard';
 import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, exportSumsToCsv, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference } from './utils';
 import GlossaryTab from '../../components/GlossaryTab';
-import FileUploader from '../../components/FileUploader';
+import FileUploader, { TAcceptedFileType } from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
 import SumByCategoryTab from '../../components/SumByCategoryTab';
 import { isEmpty } from 'lodash';
@@ -26,7 +26,7 @@ const CsvPage = () => {
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
     const [glossary, setGlossary] = useState<Glossary>({})
 
-    const csvFileInputRef = React.useRef<HTMLInputElement | null>(null);
+    const uploadedFileInputRef = React.useRef<HTMLInputElement | null>(null);
     const glossaryFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
     const resetEverything = () => {
@@ -36,7 +36,7 @@ const CsvPage = () => {
         setGlossary({});
     };
 
-    const handleCsvFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUploadedFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         resetEverything();
 
         const selectedFile = event.target.files?.[0];
@@ -50,8 +50,22 @@ const CsvPage = () => {
                 setLineItems(items);
             };
             reader.readAsText(selectedFile);
+        }
+        else if (selectedFile && selectedFile.type === 'application/pdf') {
+            // Handle PDF upload
+            const formData = new FormData();
+            formData.append('pdf', selectedFile);
+            fetch('/api/csv/pdf', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('PDF uploaded successfully:', data);
+                })
+                .catch(error => console.error('Error uploading PDF:', error));
         } else {
-            console.error('Please upload a valid CSV file.');
+            console.error('Please upload a valid CSV or PDF file.');
         }
     };
 
@@ -174,6 +188,29 @@ const CsvPage = () => {
         setSumByCategory(roundedSummedCategories);
     }, [categorizedLineItems, glossary]);
 
+    // Handler for PDF upload
+    const handleUploadPDFChanged = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile && selectedFile.type === 'application/pdf') {
+            const formData = new FormData();
+            formData.append('pdf', selectedFile);
+            try {
+                const response = await fetch('/api/csv/pdf', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to upload PDF');
+                }
+                // Optionally handle response here
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            console.error('Please upload a valid PDF file.');
+        }
+    };
+
     return (
         <Container width="100%" height="100%" p="4">
             <Heading as="h1" size="6" weight="light" mb="8">
@@ -191,13 +228,15 @@ const CsvPage = () => {
                 </Box>
 
                 <Box my="4">
-                    <FileUploader
-                        ref={csvFileInputRef}
-                        acceptedFileType=".csv"
-                        handleFileChanged={handleCsvFileChange}
-                        uploadBtnText="Upload CSV"
-                        showUploadedFileName
-                    />
+                    <Flex gap="2" align="center" mb="4">
+                        <FileUploader
+                            ref={uploadedFileInputRef}
+                            acceptedFileTypes={['.csv', '.pdf'] as TAcceptedFileType[]}
+                            handleFileChanged={handleUploadedFileChange}
+                            uploadBtnText="Upload CSV or PDF"
+                            showUploadedFileName
+                        />
+                    </Flex>
                 </Box>
             </Box>
 

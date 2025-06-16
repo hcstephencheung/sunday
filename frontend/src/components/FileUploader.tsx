@@ -2,23 +2,23 @@ import React, { useState } from "react"
 import { UploadIcon } from "@radix-ui/react-icons"
 import { Button, Text } from "@radix-ui/themes"
 
-type TAcceptedFileType = '.csv' | '.txt';
-type TExpectedFileTypes = 'text/csv' | 'text/plain';
-const expectedFileTypes = ['text/csv', 'text/plain'] as const;
+export type TAcceptedFileType = '.csv' | '.txt' | '.pdf';
+type TExpectedFileTypes = 'text/csv' | 'text/plain' | 'application/pdf';
+const expectedFileTypes = ['text/csv', 'text/plain', 'application/pdf'] as const;
 
 const fileTypeIsExpected = (fileType: string): fileType is TExpectedFileTypes => {
     return (expectedFileTypes as unknown as string[]).includes(fileType)
 }
 
 interface FileUploaderProps {
-    acceptedFileType: TAcceptedFileType
+    acceptedFileTypes: TAcceptedFileType[],
     handleFileChanged: (event: React.ChangeEvent<HTMLInputElement>) => void
     uploadBtnText: string
     showUploadedFileName: boolean
     disabled?: boolean
 }
 const FileUploader = React.forwardRef<HTMLInputElement, FileUploaderProps>(({
-    acceptedFileType,
+    acceptedFileTypes,
     handleFileChanged,
     uploadBtnText,
     showUploadedFileName,
@@ -59,7 +59,7 @@ const FileUploader = React.forwardRef<HTMLInputElement, FileUploaderProps>(({
                 className="hidden"
                 ref={ref}
                 type="file"
-                accept={acceptedFileType}
+                accept={acceptedFileTypes.join(',')}
                 multiple={false}
                 onClick={handleOnClick}
                 onChange={handleFileChange}
