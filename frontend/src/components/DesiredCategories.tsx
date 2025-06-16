@@ -1,5 +1,5 @@
 import { Cross1Icon, PlusIcon } from '@radix-ui/react-icons';
-import { Box, IconButton, Button, TextField, Tooltip, Flex } from '@radix-ui/themes';
+import { Box, IconButton, TextField, Tooltip } from '@radix-ui/themes';
 import React from 'react';
 
 const DesiredCategories: React.FC<{

@@ -4,9 +4,9 @@ import { FilePlusIcon, MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/reac
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import DataTable from '../../components/DataTable';
-import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem } from './types';
+import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
 import { BankRadioCard, Banks, CsvTransformerByBank } from '../../components/BankRadioCard';
-import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, exportSumsToCsv, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates } from './utils';
+import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, exportSumsToCsv, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference } from './utils';
 import GlossaryTab from '../../components/GlossaryTab';
 import FileUploader from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
@@ -131,15 +131,29 @@ const CsvPage = () => {
     }, [categories, categorizedLineItems]);
 
     const handleCategoriesChanged = React.useCallback((newCategories: string[]) => {
-        const newCategorySet = new Set<string>();
-        for (const item of [...categories, ...newCategories]) {
-            newCategorySet.add(item);
+        // TODO: some validation?
+        const deletedItems = arrayDifference(categories, newCategories);
+
+        // if we removed some categories, we might need to update line items too
+        if (deletedItems.length > 0) {
+            const newCategorizedLineItems = [...categorizedLineItems];
+            let hasModified = false;
+            for (const deletedItem of deletedItems) {
+                newCategorizedLineItems.forEach((lineItem) => {
+                    if (lineItem.category === deletedItem) {
+                        lineItem.category = UNCATEGORIZED;
+                        hasModified = true;
+                    }
+                });
+            }
+
+            if (hasModified) {
+                setCategorizedLineItems(newCategorizedLineItems);
+            }
         }
 
-        const mergedCategories = Array.from(newCategorySet);
-        setCategories(mergedCategories);
-
-    }, [categories]);
+        setCategories(newCategories);
+    }, [categories, categorizedLineItems]);
 
     // Effect to update data points when categorizedLineItems changes
     // could change from AI categorization or user updates

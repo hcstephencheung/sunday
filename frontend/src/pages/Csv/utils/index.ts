@@ -96,6 +96,10 @@ export const mergePrimitiveArrayWithoutDuplicates = <T>(arr1: T[], arr2: T[]): T
     return Array.from(newSet);
 };
 
+export const arrayDifference = <T>(biggerArray: T[], smallerArray: T[]): T[] => {
+  return biggerArray.filter(item => !smallerArray.includes(item));
+}
+
 export const sumCategories = (lineItems: Array<CategorizedLineItem>): Record<string, number> => {
     return lineItems.reduce((acc, item) => {
         const category = item.category;
