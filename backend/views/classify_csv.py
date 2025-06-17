@@ -36,10 +36,9 @@ async def classify_line_items(request: ClassifyRequest):
 @csv_router.post("/pdf")
 async def classify_pdf(pdf_base64: str = Form(...)):
     try:
-        logger.info(f"Received PDF for classification: {pdf_base64[:100]}")
         gpt_client = Completions(model="gpt-4.1")
         prompt, text_format = build_ocr_pdf_prompt()
-        ocr_result = gpt_client.create(
+        ocr_result = gpt_client.ask(
             input=[
                 {
                 "role": "system",

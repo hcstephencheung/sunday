@@ -11,11 +11,11 @@ if [ "$OS" = "Darwin" ]; then
         echo "Homebrew not found. Please install Homebrew first: https://brew.sh/"
         exit 1
     fi
-    bash "$(dirname "$0")/_install-requirements-macos.sh"
+    bash "$(pwd)/scripts/_install-requirements-macos.sh"
 elif [ "$OS" = "Linux" ]; then
     if [ -f /etc/debian_version ]; then
         echo "Detected Debian/Ubuntu."
-        bash "$(dirname "$0")/_install-requirements-linux.sh"
+        bash "$(pwd)/scripts/_install-requirements-linux.sh"
     else
         echo "Non-Debian Linux detected. Please install Tesseract and Ghostscript manually."
         exit 1

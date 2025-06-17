@@ -8,7 +8,7 @@ WORKDIR /backend
 COPY . .
 
 # Install dependencies and Tesseract using the install-requirements.sh script
-RUN bash install-requirements.sh
+RUN bash ./scripts/install-requirements.sh
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
