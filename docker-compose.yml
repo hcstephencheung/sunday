@@ -6,7 +6,7 @@ services:
     # build:
     #   context: ./backend
     #   dockerfile: Dockerfile
-    image: hcstephencheung/sunday-api:latest
+    image: hcstephencheung/sunday-api:0.0.1
     ports:
       - "9000:9000"
     networks:
