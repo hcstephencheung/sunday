@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from utils.logger import setup_logger
-from views.classify_csv import csv_router
+from views.api_views import api_router
 
 logger = setup_logger()
 
@@ -8,10 +8,9 @@ logger = setup_logger()
 app = FastAPI()
 
 # Include the OCR router
-app.include_router(csv_router)
+app.include_router(api_router)
 
 
-@app.get('/ping')
+@app.get("/ping")
 async def ping():
     return "backend server is up"
-

@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 from pydantic import BaseModel, RootModel
 
+
 # Types
 class GptClassifiedDescriptions(BaseModel):
     name: str
@@ -34,14 +35,17 @@ class LineItem(BaseModel):
     def validate(cls, data: Dict[str, Any]):
         if not isinstance(data.get("date"), str) or not data["date"].strip():
             raise ValueError("date must be a non-empty string")
-        if not isinstance(data.get("description"), str) or not data["description"].strip():
+        if (
+            not isinstance(data.get("description"), str)
+            or not data["description"].strip()
+        ):
             raise ValueError("description must be a non-empty string")
         if not isinstance(data.get("debit"), bool):
             raise ValueError("debit must be a boolean")
         if not isinstance(data.get("amount"), (int, float)):
             raise ValueError("amount must be a number")
         return cls(**data)
-    
+
 
 # APIs
 class ClassifyRequest(BaseModel):

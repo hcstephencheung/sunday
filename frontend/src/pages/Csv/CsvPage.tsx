@@ -64,7 +64,7 @@ const CsvPage = () => {
                 // You can handle the PDF data URL here if needed
                 const formData = new FormData();
                 formData.append('pdf_base64', pdfDataUrl);
-                fetch('/api/csv/pdf', {
+                fetch('/api/pdf', {
                     method: 'POST',
                     body: formData,
                 })
@@ -121,7 +121,7 @@ const CsvPage = () => {
         }
 
         // make the API call
-        const result = await fetch('/api/csv/classify', {
+        const result = await fetch('/api/classify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
