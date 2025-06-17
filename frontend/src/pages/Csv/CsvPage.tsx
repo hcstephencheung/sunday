@@ -70,12 +70,12 @@ const CsvPage = () => {
                     .then(response => response.json())
                     .then(data => {
                         setUploading('pdf parsed!');
-                        const lineItems = data.items.map(item => ({
+                        const lineItems: LineItem[] = data.items.map(item => ({
                             date: item.date,
                             description: item.description,
                             amount: parseFloat(item.amount),
-                            debit: parseInt(item.amount) < 0 ? 'credit' : 'debit'
-                        }))
+                            debit: parseFloat(item.amount) < 0
+                        } as LineItem))
                         setLineItems(lineItems);
                     })
                     .catch(error => console.error('Error uploading PDF:', error));
