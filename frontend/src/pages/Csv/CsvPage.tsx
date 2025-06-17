@@ -11,6 +11,7 @@ import FileUploader, { TAcceptedFileType } from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
 import SumByCategoryTab from '../../components/SumByCategoryTab';
 import { isEmpty } from 'lodash';
+import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
 
 const CsvPage = () => {
     const params = new URLSearchParams(window.location.search);
@@ -22,7 +23,7 @@ const CsvPage = () => {
     const [categories, setCategories] = useState<string[]>([]);
     const [sumByCategory, setSumByCategory] = useState<Record<string, number>>({});
     const [classifying, setClassifying] = useState<boolean>(false);
-    const [uploading, setUploading] = useState<string>('');
+    const [uploading, setUploading] = useState<PdfStages>(PdfStages.DONE);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
     const [glossary, setGlossary] = useState<Glossary>({})
 
@@ -40,11 +41,11 @@ const CsvPage = () => {
         resetEverything();
 
         const selectedFile = event.target.files?.[0];
-        setUploading('uploading...');
+        setUploading(PdfStages.UPLOADING);
         if (selectedFile && selectedFile.type === 'text/csv') {
             const reader = new FileReader();
             reader.onload = (e) => {
-                setUploading('');
+                setUploading(PdfStages.DONE);
 
                 const text = e.target?.result as string;
                 const rows = text.split('\n').map(row => row.split(','));
@@ -58,7 +59,7 @@ const CsvPage = () => {
             // Handle PDF upload
             const reader = new FileReader();
             reader.onload = (e) => {
-                setUploading('pdf parsed, using gpt to extract data...');
+                setUploading(PdfStages.PROCESSING);
                 const pdfDataUrl = e.target?.result as string;
                 // You can handle the PDF data URL here if needed
                 const formData = new FormData();
@@ -69,7 +70,7 @@ const CsvPage = () => {
                 })
                     .then(response => response.json())
                     .then(data => {
-                        setUploading('pdf parsed!');
+                        setUploading(PdfStages.READY);
                         const lineItems: LineItem[] = data.items.map(item => ({
                             date: item.date,
                             description: item.description,
@@ -231,7 +232,7 @@ const CsvPage = () => {
                             showUploadedFileName
                         />
                     </Flex>
-                    <Text my="2">{uploading}</Text>
+                    <PdfStagesGraphic stage={uploading} />
                 </Box>
             </Box>
 
@@ -243,7 +244,7 @@ const CsvPage = () => {
                 {lineItems.length > 0 && (
                     <>
                         <Button
-                            color="indigo" variant="soft" radius="large"
+                            color="jade" variant="soft" radius="large"
                             onClick={handleClassifyCsvClick}
                             disabled={classifying}
                         >
