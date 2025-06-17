@@ -5,7 +5,6 @@ from gpt.completions import Completions
 from gpt.prompts import build_ocr_pdf_prompt
 from utils.logger import setup_logger
 from csv_processor.pipeline import CsvProcessorPipeline
-from ocr.OCRReader import OCR
 
 from serializers.csv_serializers import ClassifyCsvResponse, ClassifyRequest
 
@@ -13,7 +12,6 @@ logger = setup_logger()
 csv_router = APIRouter(prefix="/api/csv")
 
 CsvProcessorClient = CsvProcessorPipeline()
-ocr_instance = OCR()
 
 @csv_router.get("/ping")
 async def ping():

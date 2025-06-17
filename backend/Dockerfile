@@ -7,8 +7,6 @@ WORKDIR /backend
 # Copy the current directory contents into the container at /app
 COPY . .
 
-RUN apt-get update && apt-get install -y bash
-
 # Install dependencies and Tesseract using the install-requirements.sh script
 RUN bash install-requirements.sh
 
