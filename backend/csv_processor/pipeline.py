@@ -1,10 +1,14 @@
 import json
-from serializers.csv_serializers import ClassifiedCategoryDescriptions, ClassifiedDescriptionsCategories
+from serializers.api_serializers import (
+    ClassifiedCategoryDescriptions,
+    ClassifiedDescriptionsCategories,
+)
 from utils.logger import setup_logger
 from gpt.prompts import build_classify_csv_prompt
 from gpt.completions import Completions
 
 logger = setup_logger()
+
 
 class CsvProcessorPipeline:
     def __init__(self):
@@ -17,30 +21,39 @@ class CsvProcessorPipeline:
         if not requested_descriptions:
             return []
 
-        deduplicated_descriptions = list(set(desc.lower() for desc in requested_descriptions))
+        deduplicated_descriptions = list(
+            set(desc.lower() for desc in requested_descriptions)
+        )
         return deduplicated_descriptions
-    
-    def postprocess_descriptions(self, classified_categories_descriptions: ClassifiedCategoryDescriptions):
+
+    def postprocess_descriptions(
+        self, classified_categories_descriptions: ClassifiedCategoryDescriptions
+    ):
         """
         Add newly processed categories to the cache.
         """
-        logs = ''
+        logs = ""
         descriptions_categories_dict = {}
         for category, descriptions in classified_categories_descriptions.items():
             sanitized_category = category.lower()
             for description in descriptions:
-                description_name = f'{description["name"]}' if description['name'] else ''
-                sanitized_description_name = description_name.lower();
+                description_name = (
+                    f'{description["name"]}' if description["name"] else ""
+                )
+                sanitized_description_name = description_name.lower()
 
-                if sanitized_description_name is not '':
-                    descriptions_categories_dict[sanitized_description_name] = sanitized_category
+                if sanitized_description_name is not "":
+                    descriptions_categories_dict[sanitized_description_name] = (
+                        sanitized_category
+                    )
                     logs = f'{logs}\n{sanitized_description_name} was categorized as {sanitized_category} at {description["confidence"]}. Reason: {description["reason"]}'
 
-        logger.info(f'Post processed CSV items: \n{logs}')
+        logger.info(f"Post processed CSV items: \n{logs}")
         return descriptions_categories_dict
 
-    
-    def classify_csv_items(self, categories: str, descriptions: str) -> ClassifiedDescriptionsCategories:
+    def classify_csv_items(
+        self, categories: str, descriptions: str
+    ) -> ClassifiedDescriptionsCategories:
         """
         Classify descriptions into categories using GPT. Categories and descriptions will be
         de-duplicated before processing. Results will be cached on instance to reduce cost.
@@ -52,25 +65,16 @@ class CsvProcessorPipeline:
             # return early if empty, skip gpt
             return {}
 
-        logger.info(f'Input descriptions {unclassified_descriptions}')
-        logger.info(f'Input categories {deduplicated_categories}')
+        logger.info(f"Input descriptions {unclassified_descriptions}")
+        logger.info(f"Input categories {deduplicated_categories}")
 
         prompt, text_format = build_classify_csv_prompt(
-            categories=deduplicated_categories,
-            descriptions=unclassified_descriptions
+            categories=deduplicated_categories, descriptions=unclassified_descriptions
         )
 
         output = self.gpt_client.ask(
             input=[
-                {
-                    "role": "system",
-                    "content": [
-                        {
-                            "type": "input_text",
-                            "text": prompt
-                        }
-                    ]
-                },
+                {"role": "system", "content": [{"type": "input_text", "text": prompt}]},
             ],
             text=text_format,
             reasoning={},
@@ -78,7 +82,7 @@ class CsvProcessorPipeline:
             temperature=0,
             max_output_tokens=2048,
             top_p=1,
-            store=True
+            store=True,
         )
 
         json_output = json.loads(output)
@@ -88,4 +92,3 @@ class CsvProcessorPipeline:
 
         # returns { [description_name]: category }
         return combined_items
-    

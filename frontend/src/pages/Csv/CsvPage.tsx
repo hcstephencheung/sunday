@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Section } from '@radix-ui/themes';
-import { FilePlusIcon, MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
+import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text } from '@radix-ui/themes';
+import { MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
-import DataTable from '../../components/DataTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
 import { BankRadioCard, Banks, CsvTransformerByBank } from '../../components/BankRadioCard';
-import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, exportSumsToCsv, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference } from './utils';
+import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference } from './utils';
 import GlossaryTab from '../../components/GlossaryTab';
-import FileUploader from '../../components/FileUploader';
+import FileUploader, { TAcceptedFileType } from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
 import SumByCategoryTab from '../../components/SumByCategoryTab';
 import { isEmpty } from 'lodash';
+import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
 
 const CsvPage = () => {
     const params = new URLSearchParams(window.location.search);
@@ -23,10 +23,11 @@ const CsvPage = () => {
     const [categories, setCategories] = useState<string[]>([]);
     const [sumByCategory, setSumByCategory] = useState<Record<string, number>>({});
     const [classifying, setClassifying] = useState<boolean>(false);
+    const [uploading, setUploading] = useState<PdfStages>(PdfStages.DONE);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
     const [glossary, setGlossary] = useState<Glossary>({})
 
-    const csvFileInputRef = React.useRef<HTMLInputElement | null>(null);
+    const uploadedFileInputRef = React.useRef<HTMLInputElement | null>(null);
     const glossaryFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
     const resetEverything = () => {
@@ -36,13 +37,16 @@ const CsvPage = () => {
         setGlossary({});
     };
 
-    const handleCsvFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUploadedFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         resetEverything();
 
         const selectedFile = event.target.files?.[0];
+        setUploading(PdfStages.UPLOADING);
         if (selectedFile && selectedFile.type === 'text/csv') {
             const reader = new FileReader();
             reader.onload = (e) => {
+                setUploading(PdfStages.DONE);
+
                 const text = e.target?.result as string;
                 const rows = text.split('\n').map(row => row.split(','));
                 const items = CsvTransformerByBank[bank](rows);
@@ -50,8 +54,36 @@ const CsvPage = () => {
                 setLineItems(items);
             };
             reader.readAsText(selectedFile);
+        }
+        else if (selectedFile && selectedFile.type === 'application/pdf') {
+            // Handle PDF upload
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setUploading(PdfStages.PROCESSING);
+                const pdfDataUrl = e.target?.result as string;
+                // You can handle the PDF data URL here if needed
+                const formData = new FormData();
+                formData.append('pdf_base64', pdfDataUrl);
+                fetch('/api/pdf', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        setUploading(PdfStages.READY);
+                        const lineItems: LineItem[] = data.items.map(item => ({
+                            date: item.date,
+                            description: item.description,
+                            amount: parseFloat(item.amount),
+                            debit: parseFloat(item.amount) >= 0
+                        } as LineItem))
+                        setLineItems(lineItems);
+                    })
+                    .catch(error => console.error('Error uploading PDF:', error));
+            }
+            reader.readAsDataURL(selectedFile);
         } else {
-            console.error('Please upload a valid CSV file.');
+            console.error('Please upload a valid CSV or PDF file.');
         }
     };
 
@@ -89,7 +121,7 @@ const CsvPage = () => {
         }
 
         // make the API call
-        const result = await fetch('/api/csv/classify', {
+        const result = await fetch('/api/classify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -191,13 +223,16 @@ const CsvPage = () => {
                 </Box>
 
                 <Box my="4">
-                    <FileUploader
-                        ref={csvFileInputRef}
-                        acceptedFileType=".csv"
-                        handleFileChanged={handleCsvFileChange}
-                        uploadBtnText="Upload CSV"
-                        showUploadedFileName
-                    />
+                    <Flex gap="2" align="center" mb="4">
+                        <FileUploader
+                            ref={uploadedFileInputRef}
+                            acceptedFileTypes={['.csv', '.pdf'] as TAcceptedFileType[]}
+                            handleFileChanged={handleUploadedFileChange}
+                            uploadBtnText="Upload CSV or PDF"
+                            showUploadedFileName
+                        />
+                    </Flex>
+                    <PdfStagesGraphic stage={uploading} />
                 </Box>
             </Box>
 
@@ -209,7 +244,7 @@ const CsvPage = () => {
                 {lineItems.length > 0 && (
                     <>
                         <Button
-                            color="indigo" variant="soft" radius="large"
+                            color="jade" variant="soft" radius="large"
                             onClick={handleClassifyCsvClick}
                             disabled={classifying}
                         >
@@ -219,7 +254,7 @@ const CsvPage = () => {
                         <FileUploader
                             disabled={classifying}
                             ref={glossaryFileInputRef}
-                            acceptedFileType=".txt"
+                            acceptedFileTypes={[".txt"]}
                             handleFileChanged={handleGlossaryFileChange}
                             uploadBtnText="Use previous definitions"
                             showUploadedFileName={false}
