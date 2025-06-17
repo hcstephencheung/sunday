@@ -2,11 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    # image: sunday-api 
-    # build:
-    #   context: ./backend
-    #   dockerfile: Dockerfile
-    image: hcstephencheung/sunday-api:0.0.1
+    image: hcstephencheung/sunday-api:latest
     ports:
       - "9000:9000"
     networks:
