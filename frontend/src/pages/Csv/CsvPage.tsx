@@ -74,6 +74,7 @@ const CsvPage = () => {
                             date: item.date,
                             description: item.description,
                             amount: parseFloat(item.amount),
+                            debit: parseInt(item.amount) < 0 ? 'credit' : 'debit'
                         }))
                         setLineItems(lineItems);
                     })
