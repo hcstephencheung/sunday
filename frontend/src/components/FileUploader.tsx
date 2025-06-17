@@ -18,7 +18,7 @@ interface FileUploaderProps {
     disabled?: boolean
 }
 const FileUploader = React.forwardRef<HTMLInputElement, FileUploaderProps>(({
-    acceptedFileTypes,
+    acceptedFileTypes = ['.csv', '.txt', '.pdf'],
     handleFileChanged,
     uploadBtnText,
     showUploadedFileName,

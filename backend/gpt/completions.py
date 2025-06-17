@@ -33,3 +33,20 @@ class Completions:
         logger.info(f'OpenAI response: {response.output_text}')
         
         return response.output_text
+    
+    def create(self, input, text, reasoning, tools, temperature=0.1, max_output_tokens=2048, top_p=1, store=True):
+        # return mock_response()
+        response = self.client.responses.create(
+            model=self.model,
+            input=input,
+            text=text,
+            reasoning=reasoning,
+            tools=tools,
+            temperature=temperature,
+            max_output_tokens=max_output_tokens,
+            top_p=top_p,
+            store=store
+        )
+        logger.info(f'OpenAI response: {response.output_text}')
+        
+        return response.output_text

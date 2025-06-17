@@ -75,3 +75,58 @@ def build_classify_csv_prompt(
     }
 
     return prompt, text_format
+
+def build_ocr_pdf_prompt() -> Tuple[str, Dict[str, Any], Dict[str, Any]]:
+    prompt = """
+        Parse the uploaded PDF file as a credit card statement into an array of line items. Parse using the following rules:
+            - look for amounts and charges made as a table, then parse each line into the output schema.
+            - if there are 2 date columns, check the table header and use the transaction date as the output.
+            - ignore any text that doesn't fit into the output schema.
+            - if the transaction is a payment, then treat that line item type as credit. Otherwise, and by default, treat it as debit since this is a credit card balance
+            - state the confidence of the text extraction in the confidence as a number, and the reason as a string.
+    """
+    text_format = {
+        "format": {
+            "type": "json_schema",
+            "name": "transaction_list",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "items": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                    "type": "string",
+                    "format": "date"
+                    },
+                    "description": {
+                    "type": "string"
+                    },
+                    "amount": {
+                    "type": "number"
+                    },
+                    "confidence": {
+                    "type": "string"
+                    },
+                    "reason": {
+                    "type": "number"
+                    }
+                },
+                "required": [
+                    "date",
+                    "description",
+                    "amount",
+                    "confidence",
+                    "number"
+                ],
+                "additionalProperties": False
+                },
+                "additionalProperties": False,
+                "properties": {},
+                "required": []
+            }
+        }
+    }
+
+
+    return prompt, text_format
