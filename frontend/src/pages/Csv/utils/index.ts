@@ -239,3 +239,32 @@ export function parseDateString(dateStr: string): string {
     if (isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
+
+export const streamPdf = async (pdfDataUrl: string, onData, onError, onEnd) => {
+    const formData = new FormData();
+    formData.append('pdf_base64', pdfDataUrl);
+    const streamId = await fetch('/api/pdf/stream', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!streamId.ok) {
+        throw new Error(`Failed to start PDF stream: ${streamId.statusText}`);
+    }
+    const id = await streamId.json();
+    const eventSource = new EventSource(`/api/pdf/stream?id=${id}`);
+    eventSource.onmessage = (event) => {
+        // Each event.data is a chunk of the streamed response
+        onData(event.data);
+    };
+    eventSource.addEventListener('end', (event) => {
+        onEnd(event.data);
+        eventSource.close();
+    });
+
+    eventSource.onerror = (error) => {
+        console.error('Error in PDF stream:', error);
+        eventSource.close();
+        onError();
+    };
+}

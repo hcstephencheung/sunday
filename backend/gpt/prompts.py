@@ -75,7 +75,7 @@ def build_classify_csv_prompt(
     return prompt, text_format
 
 
-def build_ocr_pdf_prompt() -> Tuple[str, Dict[str, Any], Dict[str, Any]]:
+def build_ocr_pdf_prompt() -> Tuple[str, Dict[str, Any]]:
     prompt = """
         Parse the uploaded PDF file as a credit card statement into an array of line items. Parse using the following rules:
         - look for amounts and charges made as a table, then parse each line into the output schema.

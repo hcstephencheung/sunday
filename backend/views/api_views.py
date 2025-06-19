@@ -1,7 +1,9 @@
 import json
 import base64
 from fastapi import APIRouter, Form, HTTPException, File, UploadFile
+from fastapi.responses import StreamingResponse
 from gpt.completions import Completions
+from gpt.ocr.ocr_handler import OcrHandler
 from gpt.prompts import build_ocr_pdf_prompt
 from utils.logger import setup_logger
 from csv_processor.pipeline import CsvProcessorPipeline
@@ -12,6 +14,7 @@ logger = setup_logger()
 api_router = APIRouter(prefix="/api")
 
 CsvProcessorClient = CsvProcessorPipeline()
+ocr_parser = OcrHandler()
 
 
 @api_router.get("/ping")
@@ -40,32 +43,30 @@ async def classify_line_items(request: ClassifyRequest):
 
 @api_router.post("/pdf")
 async def classify_pdf(pdf_base64: str = Form(...)):
+    result = None
     try:
-        gpt_client = Completions(model="gpt-4.1")
-        prompt, text_format = build_ocr_pdf_prompt()
-        ocr_result = gpt_client.ask(
-            input=[
-                {"role": "system", "content": [{"type": "input_text", "text": prompt}]},
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "input_file",
-                            "filename": "cc.pdf",
-                            "file_data": pdf_base64,
-                        }
-                    ],
-                },
-            ],
-            text=text_format,
-            reasoning={},
-            tools=[],
-            temperature=0,
-            max_output_tokens=8192,
-            top_p=1,
-            store=True,
-        )
-        ocr_json = json.loads(ocr_result)
-        return ocr_json
+        result = ocr_parser.parse_pdf(pdf_base64)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return result
+
+
+@api_router.post("/pdf/stream")
+async def classify_pdf_stream(pdf_base64: str = Form(...)):
+    result = None
+    try:
+        result = ocr_parser.create_stream(pdf_base64)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@api_router.get("/pdf/stream")
+async def output_pdf_stream(id: str):
+    result = None
+    try:
+        result = ocr_parser.stream_pdf(id)
+        return StreamingResponse(result, media_type="text/event-stream")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

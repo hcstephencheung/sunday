@@ -5,7 +5,7 @@ import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
 import { BankRadioCard, Banks, CsvTransformerByBank } from '../../components/BankRadioCard';
-import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference } from './utils';
+import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference, fetchStreamedResponse, streamPdf } from './utils';
 import GlossaryTab from '../../components/GlossaryTab';
 import FileUploader, { TAcceptedFileType } from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
@@ -62,24 +62,37 @@ const CsvPage = () => {
                 setUploading(PdfStages.PROCESSING);
                 const pdfDataUrl = e.target?.result as string;
                 // You can handle the PDF data URL here if needed
-                const formData = new FormData();
-                formData.append('pdf_base64', pdfDataUrl);
-                fetch('/api/pdf', {
-                    method: 'POST',
-                    body: formData,
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        setUploading(PdfStages.READY);
-                        const lineItems: LineItem[] = data.items.map(item => ({
-                            date: item.date,
-                            description: item.description,
-                            amount: parseFloat(item.amount),
-                            debit: parseFloat(item.amount) >= 0
-                        } as LineItem))
-                        setLineItems(lineItems);
-                    })
-                    .catch(error => console.error('Error uploading PDF:', error));
+                let jsonData = '';
+                const onData = (data) => {
+                    console.log('Received chunk:', data);
+                    jsonData += data;
+                };
+                const onError = () => {
+                    setUploading(PdfStages.DONE);
+                    const data = JSON.parse(jsonData);
+                    console.log('errored, but data', data);
+                    const lineItems = data.items.map(item => ({
+                        date: item.date,
+                        description: item.description,
+                        amount: parseFloat(item.amount),
+                        debit: parseFloat(item.amount) >= 0
+                    } as LineItem))
+                    setLineItems(lineItems);
+                }
+                const onEnd = () => {
+                    console.log('streaming complete');
+                    setUploading(PdfStages.DONE);
+                    const data = JSON.parse(jsonData);
+                    console.log('completed, data', data);
+                    const lineItems = data.items.map(item => ({
+                        date: item.date,
+                        description: item.description,
+                        amount: parseFloat(item.amount),
+                        debit: parseFloat(item.amount) >= 0
+                    } as LineItem))
+                    setLineItems(lineItems);
+                }
+                streamPdf(pdfDataUrl, onData, onError, onEnd);
             }
             reader.readAsDataURL(selectedFile);
         } else {
