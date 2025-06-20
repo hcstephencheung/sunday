@@ -240,7 +240,7 @@ export function parseDateString(dateStr: string): string {
     return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export const streamPdf = async (pdfDataUrl: string, onData, onError, onEnd) => {
+export const streamPdf = async (pdfDataUrl: string, onData, onError, onCompleted, onEnd) => {
     const formData = new FormData();
     formData.append('pdf_base64', pdfDataUrl);
     const streamId = await fetch('/api/pdf/stream', {
@@ -257,6 +257,11 @@ export const streamPdf = async (pdfDataUrl: string, onData, onError, onEnd) => {
         // Each event.data is a chunk of the streamed response
         onData(event.data);
     };
+
+    eventSource.addEventListener('complete', (event) => {
+        onCompleted(event.data);
+    });
+
     eventSource.addEventListener('end', (event) => {
         onEnd(event.data);
         eventSource.close();

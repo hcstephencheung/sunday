@@ -4,6 +4,7 @@ import uuid
 from fastapi.responses import JSONResponse
 from gpt.completions import Completions
 from gpt.prompts import build_ocr_pdf_prompt
+from openai.types.responses import ResponseOutputItem, ResponseOutputMessage
 
 from dotenv import load_dotenv
 
@@ -93,9 +94,9 @@ class OcrHandler:
                 print(event.delta, flush=True, end="")
                 yield event.delta
             elif event.type == "response.output_text.delta":
-                print(event.delta, flush=True, end="")
+                # print(event.delta, flush=True, end="")
                 # TODO: NEED TO PARSE THIS PROPERLY before yielding BECAUSE IT'S OUTPUTTING CHARACTERS
-                yield f"data: {event.delta}\n\n"
+                yield f"data: {event.delta}\n"
             elif event.type == "response.error":
                 print(event.error, flush=True, end="")
                 raise Exception(f"Error in streaming response: {event.error}")
@@ -103,4 +104,14 @@ class OcrHandler:
                 # TODO: this doesn't get flushed for some reason
                 print("Completed", flush=True, end="")
                 print(event.response.output, flush=True, end="")
+                for output_message in event.response.output:
+                    if isinstance(output_message, ResponseOutputMessage):
+                        full_output = [
+                            # we know it's a completed message
+                            content.text
+                            for content in output_message.content
+                        ]
+                        yield f"event: completed\n"
+                        yield f"data: {''.join(full_output)}\n"
+
                 yield f"event: end\n"
