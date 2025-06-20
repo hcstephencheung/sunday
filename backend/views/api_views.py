@@ -1,6 +1,6 @@
 import json
 import base64
-from fastapi import APIRouter, Form, HTTPException, File, UploadFile
+from fastapi import APIRouter, Form, HTTPException, File, UploadFile, WebSocket
 from fastapi.responses import StreamingResponse
 from gpt.completions import Completions
 from gpt.ocr.ocr_handler import OcrHandler
@@ -69,4 +69,27 @@ async def output_pdf_stream(id: str):
         result = ocr_parser.stream_pdf(id)
         return StreamingResponse(result, media_type="text/event-stream")
     except Exception as e:
+        logger.error(f"Error in output_pdf_stream: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@api_router.websocket("/pdf/stream/ws")
+async def output_pdf_stream_wss(websocket: WebSocket, id: str):
+    print(f"WebSocket connection established for id: {id}")
+    await websocket.accept()
+    try:
+        result = ocr_parser.stream_pdf(id)
+        for message in result:
+            await websocket.send_text(message)
+    except Exception as e:
+        logger.error(f"Error in output_pdf_stream_wss: {str(e)}")
+        # Optionally, try to send an error message, but ignore if it fails
+        try:
+            await websocket.send_text(f"Error: {str(e)}")
+        except Exception:
+            pass
+    finally:
+        try:
+            await websocket.close()
+        except Exception:
+            pass

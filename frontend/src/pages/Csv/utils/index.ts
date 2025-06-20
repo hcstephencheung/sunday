@@ -240,7 +240,8 @@ export function parseDateString(dateStr: string): string {
     return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export const streamPdf = async (pdfDataUrl: string, onData, onError, onCompleted, onEnd) => {
+const WEBSOCKET_HOST = 'wss://sunday.localhost'; // for now...
+export const streamPdf = async (pdfDataUrl: string, {onData, onError, onCompleted, onEnd}) => {
     const formData = new FormData();
     formData.append('pdf_base64', pdfDataUrl);
     const streamId = await fetch('/api/pdf/stream', {
@@ -252,24 +253,56 @@ export const streamPdf = async (pdfDataUrl: string, onData, onError, onCompleted
         throw new Error(`Failed to start PDF stream: ${streamId.statusText}`);
     }
     const id = await streamId.json();
-    const eventSource = new EventSource(`/api/pdf/stream?id=${id}`);
-    eventSource.onmessage = (event) => {
-        // Each event.data is a chunk of the streamed response
-        onData(event.data);
+    const ws = new WebSocket(`${WEBSOCKET_HOST}/api/pdf/stream/ws?id=${id}`);
+
+    ws.onopen = () => {
+        console.log("WebSocket connection opened");
     };
 
-    eventSource.addEventListener('complete', (event) => {
+    ws.onmessage = (event) => {
+        console.log("Received message:", event.data);
+        onData(event.data);
+        // Handle the streamed PDF data here
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed");
+    };
+
+    ws.addEventListener('complete', (event) => {
+        console.log("Stream completed:", event.data);
         onCompleted(event.data);
     });
 
-    eventSource.addEventListener('end', (event) => {
+    ws.addEventListener('end', (event) => {
+        console.log("Stream ended:", event.data);
         onEnd(event.data);
-        eventSource.close();
     });
 
-    eventSource.onerror = (error) => {
-        console.error('Error in PDF stream:', error);
-        eventSource.close();
-        onError();
-    };
+
+    // SSE implementation
+    // const eventSource = new EventSource(`/api/pdf/stream?id=${id}`);
+    // eventSource.onmessage = (event) => {
+    //     // Each event.data is a chunk of the streamed response
+    //     onData(event.data);
+    // };
+
+    // eventSource.addEventListener('complete', (event) => {
+    //     onCompleted(event.data);
+    // });
+
+    // eventSource.addEventListener('end', (event) => {
+    //     onEnd(event.data);
+    //     eventSource.close();
+    // });
+
+    // eventSource.onerror = (error) => {
+    //     console.error('Error in PDF stream:', error);
+    //     onError(error);
+    //     eventSource.close();
+    // };
 }

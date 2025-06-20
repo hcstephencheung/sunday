@@ -25,4 +25,7 @@ else
     exit 1
 fi
 
+echo "=================== installing python dependencies ==================="
+pip install --no-cache-dir -r requirements.txt
+
 echo "All dependencies installed."

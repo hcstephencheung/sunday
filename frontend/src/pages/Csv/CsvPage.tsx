@@ -68,26 +68,32 @@ const CsvPage = () => {
                     jsonData += data;
                     setStreamedContent(jsonData);
                 };
-                const onError = () => {
-                    setUploading(PdfStages.DONE);
-                    console.log('errored, but data', jsonData);
+                const onError = (error) => {
+                    // setUploading(PdfStages.DONE);
+                    console.log(error);
                 }
                 const onCompleted = (completedData) => {
                     setUploading(PdfStages.DONE);
-                    const data = JSON.parse(completedData);
-                    console.log('completed, data', data);
-                    const lineItems = data.items.map(item => ({
-                        date: item.date,
-                        description: item.description,
-                        amount: parseFloat(item.amount),
-                        debit: parseFloat(item.amount) >= 0
-                    } as LineItem))
-                    setLineItems(lineItems);
+                    try {
+                        const data = JSON.parse(`${completedData}`);
+                        console.log('completed, data', data);
+                        const lineItems = data.items.map(item => ({
+                            date: item.date,
+                            description: item.description,
+                            amount: parseFloat(item.amount),
+                            debit: parseFloat(item.amount) >= 0
+                        } as LineItem))
+                        setLineItems(lineItems);
+                    }
+                    catch (e) {
+                        console.error('Error parsing JSON data:', e);
+                        setUploading(PdfStages.DONE);
+                    }
                 }
                 const onEnd = () => {
                     console.log('streaming complete');
                 }
-                streamPdf(pdfDataUrl, onData, onError, onCompleted, onEnd);
+                streamPdf(pdfDataUrl, { onData, onError, onCompleted, onEnd });
             }
             reader.readAsDataURL(selectedFile);
         } else {
