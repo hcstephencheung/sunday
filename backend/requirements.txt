@@ -1,8 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
+websockets
 pydantic
 requests
 openai
 dotenv
 google-cloud-logging
 python-multipart
+streamingjson

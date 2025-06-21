@@ -1,4 +1,5 @@
 import { CategorizedLineItem, ClassifiedItem, FILE_DELIMITER, Glossary, LineItem, UNCATEGORIZED } from "../types";
+import { DELTA_COMPLETED_SEPARATER, EVENT_DELIMITER } from "./WebSocketEventProxy";
 
 export const _removeQuotes = (str: string): string => {
     const result = str.replace(/^\"/, '').replace(/\"$/, ''); // Clean up quotes if present
@@ -238,4 +239,84 @@ export function parseDateString(dateStr: string): string {
     const date = new Date(`${year}-${month}-${day}`);
     if (isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+const WEBSOCKET_PROTOCOL = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+export const streamPdf = async (pdfDataUrl: string, { onData, onError, onCompleted }) => {
+    const formData = new FormData();
+    formData.append('pdf_base64', pdfDataUrl);
+    const streamId = await fetch('/api/pdf/stream', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!streamId.ok) {
+        throw new Error(`Failed to start PDF stream: ${streamId.statusText}`);
+    }
+    const id = await streamId.json();
+    const ws = new WebSocket(`${WEBSOCKET_PROTOCOL}${window.location.host}/api/pdf/stream/ws?id=${id}`);
+
+    ws.onopen = () => {
+        console.log("WebSocket connection opened");
+    };
+
+    ws.onmessage = (event) => {
+        if (event.data.includes(DELTA_COMPLETED_SEPARATER)) {
+            const finalResult = event.data.split(DELTA_COMPLETED_SEPARATER)[1];
+            const finalResultJson = JSON.parse(JSON.parse(finalResult)); // TODO, why double parse?
+            // finalResultJson is in shape of openAI response
+            const outputText = finalResultJson.output[0].content[0].text
+            const finalLineItems = serializeDataToLineItems(outputText);
+            if (finalLineItems) {
+                onCompleted(finalLineItems);
+            }
+            else {
+                onError(new Error("Failed to parse final result line items"));
+            }
+
+            console.log("Regardless, websocket is closing");
+        }
+        else {
+            const inProgressLineItems = serializeDataToLineItems(event.data);
+            if (inProgressLineItems) {
+                onData(inProgressLineItems);
+            }
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        onError(error);
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed");
+    };
+}
+
+export const serializeDataToLineItems = (deltaData: string) => {
+    try {
+        const parsedData = JSON.parse(deltaData);
+        let validatedLineItems = [];
+        if (parsedData.items && Array.isArray(parsedData.items)) {
+            const items = parsedData.items;
+            for (const item of items) {
+                if (item.date && item.description && item.amount) {
+                    validatedLineItems.push({
+                        date: item.date,
+                        description: item.description,
+                        amount: parseFloat(item.amount),
+                        debit: parseFloat(item.amount) >= 0
+                    } as LineItem);
+                }
+            }
+
+            if (validatedLineItems.length > 0) {
+                return validatedLineItems;
+            }
+        }
+    } catch (e) {
+        console.log('Error parsing JSON data:', e);
+        return false;
+    }
 }

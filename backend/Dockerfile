@@ -10,8 +10,6 @@ COPY . .
 # Install dependencies and Tesseract using the install-requirements.sh script
 RUN bash ./scripts/install-requirements.sh
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the app runs on
 EXPOSE 9000

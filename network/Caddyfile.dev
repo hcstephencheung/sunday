@@ -2,5 +2,9 @@ sunday.localhost {
     reverse_proxy /* frontend:3000
     reverse_proxy /api/* backend:9000
 
-    encode gzip
+    log {
+        output stdout
+        format console
+        level INFO
+    }
 }
