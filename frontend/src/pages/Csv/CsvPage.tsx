@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Code } from '@radix-ui/themes';
+import { Heading, Button, Spinner, Tabs, Box, Flex, Container } from '@radix-ui/themes';
 import { MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
 import { BankRadioCard, Banks, CsvTransformerByBank } from '../../components/BankRadioCard';
-import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference, fetchStreamedResponse, streamPdf } from './utils';
+import { tagLineItemsWithClassification, sumCategories, sortAndSumCategories, sanitizeLineItems, santizeClassifiedItems, buildGlossary, loadTextFileAsObject, getCategoriesFromLineItems, mergePrimitiveArrayWithoutDuplicates, arrayDifference, streamPdf } from './utils';
 import GlossaryTab from '../../components/GlossaryTab';
 import FileUploader, { TAcceptedFileType } from '../../components/FileUploader';
 import isEqual from 'lodash/isEqual';
@@ -26,7 +26,6 @@ const CsvPage = () => {
     const [uploading, setUploading] = useState<PdfStages>(PdfStages.DONE);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
     const [glossary, setGlossary] = useState<Glossary>({});
-    const [streamedContent, setStreamedContent] = useState<string>('');
 
     const uploadedFileInputRef = React.useRef<HTMLInputElement | null>(null);
     const glossaryFileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -62,38 +61,21 @@ const CsvPage = () => {
             reader.onload = (e) => {
                 setUploading(PdfStages.PROCESSING);
                 const pdfDataUrl = e.target?.result as string;
-                // You can handle the PDF data URL here if needed
-                let jsonData = '';
-                const onData = (data) => {
-                    jsonData += data;
-                    setStreamedContent(jsonData);
+                const onData = (inProgressLineItems: LineItem[]) => {
+                    setLineItems(inProgressLineItems);
                 };
-                const onError = (error) => {
-                    // setUploading(PdfStages.DONE);
-                    console.log(error);
-                }
-                const onCompleted = (completedData) => {
+                const onCompleted = (completedLineItems: LineItem[]) => {
+                    if (!isEqual(lineItems, completedLineItems)) {
+                        setLineItems(completedLineItems);
+                    }
                     setUploading(PdfStages.DONE);
-                    try {
-                        const data = JSON.parse(`${completedData}`);
-                        console.log('completed, data', data);
-                        const lineItems = data.items.map(item => ({
-                            date: item.date,
-                            description: item.description,
-                            amount: parseFloat(item.amount),
-                            debit: parseFloat(item.amount) >= 0
-                        } as LineItem))
-                        setLineItems(lineItems);
-                    }
-                    catch (e) {
-                        console.error('Error parsing JSON data:', e);
-                        setUploading(PdfStages.DONE);
-                    }
                 }
-                const onEnd = () => {
-                    console.log('streaming complete');
-                }
-                streamPdf(pdfDataUrl, { onData, onError, onCompleted, onEnd });
+                const onError = (error: Error) => {
+                    console.error('Error processing PDF:', error);
+                    setUploading(PdfStages.DONE);
+                    resetEverything();
+                };
+                streamPdf(pdfDataUrl, { onData, onError, onCompleted });
             }
             reader.readAsDataURL(selectedFile);
         } else {
@@ -247,9 +229,6 @@ const CsvPage = () => {
                         />
                     </Flex>
                     <PdfStagesGraphic stage={uploading} />
-                    {uploading === PdfStages.PROCESSING && (<Code>
-                        {streamedContent}
-                    </Code>)}
                 </Box>
             </Box>
 
@@ -280,7 +259,7 @@ const CsvPage = () => {
                 )}
             </Flex>
 
-            <Box width="100%">
+            <Box width="100%" pb="6">
                 {/* Summed categories */}
                 {Object.keys(sumByCategory).length <= 0 ?
                     lineItems.length > 0 && <LineItemTable lineItems={lineItems} />

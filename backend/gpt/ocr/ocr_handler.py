@@ -1,11 +1,10 @@
 import asyncio
 import json
 import uuid
+import streamingjson
 
-from fastapi.responses import JSONResponse
 from gpt.completions import Completions
 from gpt.prompts import build_ocr_pdf_prompt
-from openai.types.responses import ResponseOutputItem, ResponseOutputMessage
 
 from dotenv import load_dotenv
 
@@ -13,6 +12,10 @@ load_dotenv()
 from utils.logger import setup_logger
 
 logger = setup_logger()
+
+COMPLETED_EVENT = "event: completed\n"
+DELTA_EVENT = "event: delta\n"
+EVENT_DELIMITER = "============\n\n"
 
 
 class OcrHandler:
@@ -90,18 +93,29 @@ class OcrHandler:
             stream=True,
         )
 
+        lexer = streamingjson.Lexer()
+
         for event in stream:
-            print(f"Event type: {event.type}")
             if event.type == "response.refusal.delta":
                 yield event.delta
             elif event.type == "response.output_text.delta":
-                yield event.delta
+                lexer.append_string(event.delta)
+                try:
+                    parsed = lexer.complete_json()
+                except Exception as e:
+                    # If the buffer is not a complete JSON, continue accumulating
+                    print(f"Buffer not complete: {e}")
+                    continue
+                # yield DELTA_EVENT
+                yield parsed
+                # yield EVENT_DELIMITER
+
             elif event.type == "response.error":
                 raise Exception(f"Error in streaming response: {event.error}")
             elif event.type == "response.completed":
-                # TODO: this doesn't get flushed for some reason
-                final_result = event.to_json()
-                yield "\n\n"
-                yield final_result
+                final_result = event.response.to_json()
+                # yield COMPLETED_EVENT
+                yield f"${EVENT_DELIMITER}{json.dumps(final_result)}"
 
-            await asyncio.sleep(0.05)
+            # for some reason needed to create this for websocket to push messages to frontend
+            await asyncio.sleep(0)
