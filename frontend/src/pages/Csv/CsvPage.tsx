@@ -36,6 +36,7 @@ const CsvPage = () => {
         setCategorizedLineItems([]);
         setSumByCategory({});
         setGlossary({});
+        setStreamedContent('');
     };
 
     const handleUploadedFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,19 +71,25 @@ const CsvPage = () => {
                 };
                 const onError = () => {
                     setUploading(PdfStages.DONE);
-                    console.log('errored, but data', jsonData);
+                    resetEverything();
                 }
                 const onCompleted = (completedData) => {
                     setUploading(PdfStages.DONE);
-                    const data = JSON.parse(completedData);
-                    console.log('completed, data', data);
-                    const lineItems = data.items.map(item => ({
-                        date: item.date,
-                        description: item.description,
-                        amount: parseFloat(item.amount),
-                        debit: parseFloat(item.amount) >= 0
-                    } as LineItem))
-                    setLineItems(lineItems);
+                    try {
+                        console.log('completed, data', completedData);
+                        const data = JSON.parse(completedData);
+                        const lineItems = data.items.map(item => ({
+                            date: item.date,
+                            description: item.description,
+                            amount: parseFloat(item.amount),
+                            debit: parseFloat(item.amount) >= 0
+                        } as LineItem))
+                        setLineItems(lineItems);
+                    }
+                    catch (e) {
+                        console.error('Error parsing completed data', e);
+                        resetEverything();
+                    }
                 }
                 const onEnd = () => {
                     console.log('streaming complete');
