@@ -78,8 +78,7 @@ async def output_pdf_stream_wss(websocket: WebSocket, id: str):
     print(f"WebSocket connection established for id: {id}")
     await websocket.accept()
     try:
-        result = ocr_parser.stream_pdf(id)
-        for message in result:
+        async for message in ocr_parser.stream_pdf(id):
             await websocket.send_text(message)
     except Exception as e:
         logger.error(f"Error in output_pdf_stream_wss: {str(e)}")

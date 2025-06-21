@@ -96,6 +96,7 @@ def build_ocr_pdf_prompt() -> Tuple[str, Dict[str, Any]]:
                     "properties": {
                         "date": {"type": "string", "format": "date"},
                         "description": {"type": "string"},
+                        "debit": {"type": "boolean"},
                         "amount": {"type": "number"},
                         "confidence": {"type": "string"},
                         "reason": {"type": "number"},
@@ -103,6 +104,7 @@ def build_ocr_pdf_prompt() -> Tuple[str, Dict[str, Any]]:
                     "required": [
                         "date",
                         "description",
+                        "debit",
                         "amount",
                         "confidence",
                         "number",

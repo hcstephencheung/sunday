@@ -1,3 +1,4 @@
+import asyncio
 import json
 import uuid
 
@@ -56,7 +57,7 @@ class OcrHandler:
         logger.info(f"Created stream with id {stream_id}")
         return stream_id
 
-    def stream_pdf(self, id: str):
+    async def stream_pdf(self, id: str):
         if self.stream["id"] != id:
             err_msg = f"Requested {repr(id)} is not same as {repr(self.stream['id'])}"
             logger.info(err_msg)
@@ -94,13 +95,13 @@ class OcrHandler:
             if event.type == "response.refusal.delta":
                 yield event.delta
             elif event.type == "response.output_text.delta":
-                # TODO: NEED TO PARSE THIS PROPERLY before yielding BECAUSE IT'S OUTPUTTING CHARACTERS
-                # yield f"data: {event.delta}\n"
                 yield event.delta
             elif event.type == "response.error":
                 raise Exception(f"Error in streaming response: {event.error}")
             elif event.type == "response.completed":
                 # TODO: this doesn't get flushed for some reason
                 final_result = event.to_json()
-                yield "event: completed\n"
-                yield f"data: {final_result}\n\n"
+                yield "\n\n"
+                yield final_result
+
+            await asyncio.sleep(0.05)
