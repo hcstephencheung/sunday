@@ -9,7 +9,4 @@ if ! command -v brew &> /dev/null; then
 fi
 brew install tesseract ghostscript
 
-echo "Installing Python dependencies..."
-pip install -r requirements.txt
-
 echo "All dependencies installed."

@@ -26,6 +26,7 @@ else
 fi
 
 echo "=================== installing python dependencies ==================="
-pip install --no-cache-dir -r requirements.txt
+pip install poetry
+poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root
 
 echo "All dependencies installed."

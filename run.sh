@@ -10,6 +10,7 @@ fi
 if [ "$ENV" = "prod" ]; then
     echo "Running in production mode..."
     COMPOSE_FILE="docker-compose.prod.yml"
+    docker compose -f "$COMPOSE_FILE" pull backend
 else
     echo "Running in development mode..."
     COMPOSE_FILE="docker-compose.dev.yml"

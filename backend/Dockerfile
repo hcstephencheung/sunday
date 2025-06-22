@@ -1,15 +1,14 @@
 # Use the official Python image as a parent image
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 # Set the working directory in the container
 WORKDIR /backend
 
-COPY requirements.txt .
-# Install system dependencies and Python packages
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy the current directory contents into the container at /app
-COPY . .
+COPY /scripts ./scripts
+
+# Copy only poetry files first for better caching
+COPY pyproject.toml poetry.lock ./
 
 # Install dependencies and Tesseract using the install-requirements.sh script
 RUN bash ./scripts/install-requirements.sh
