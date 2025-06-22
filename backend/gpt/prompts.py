@@ -110,7 +110,7 @@ def build_ocr_pdf_prompt() -> Tuple[str, Dict[str, Any]]:
                     "additionalProperties": False,
                 },
                 "properties": {},
-                "required": [],
+                "required": ["items"],
             },
         }
     }

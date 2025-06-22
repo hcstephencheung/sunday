@@ -265,12 +265,13 @@ export const streamPdf = async (pdfDataUrl: string, { onData, onError, onComplet
             const finalResult = event.data.split(DELTA_COMPLETED_SEPARATER)[1];
             const finalResultJson = JSON.parse(JSON.parse(finalResult)); // TODO, why double parse?
             // finalResultJson is in shape of openAI response
-            const outputText = finalResultJson.output[0].content[0].text
+            const outputText = finalResultJson.output[0].content[0].text;
             const finalLineItems = serializeDataToLineItems(outputText);
             if (finalLineItems) {
                 onCompleted(finalLineItems);
             }
             else {
+                console.error("Failed to parse final result line items:", outputText);
                 onError(new Error("Failed to parse final result line items"));
             }
 
