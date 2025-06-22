@@ -10,7 +10,6 @@ COPY . .
 # Install dependencies and Tesseract using the install-requirements.sh script
 RUN bash ./scripts/install-requirements.sh
 
-
 # Expose the port the app runs on
 EXPOSE 9000
 
