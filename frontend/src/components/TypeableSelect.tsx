@@ -30,6 +30,7 @@ const TypeableSelect = ({
     selectionColor = 'accent'
 }: TypeableSelectProps) => {
     const [textInput, setTextInput] = useState('');
+    const [open, setOpenChange] = useState(false);
 
     const handleTextInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTextInput(e.target.value);
@@ -55,12 +56,17 @@ const TypeableSelect = ({
         }
     }
 
+    const handleSelectTriggerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        setOpenChange(!open);
+    };
+
     return (
-        <Select.Root onValueChange={onSelectedOptionChange} value={defaultOption.value}>
+        <Select.Root onValueChange={onSelectedOptionChange} value={defaultOption.value} open={open} onOpenChange={setOpenChange}>
             <Box minWidth="240px">
                 <TextField.Root placeholder="Add a category..." value={textInput} onChange={handleTextInputChange} onKeyDown={handleTextInputKeydown}>
                     <TextField.Slot pl="0">
-                        <SelectPrimitive.Trigger asChild>
+                        <SelectPrimitive.Trigger asChild onClick={handleSelectTriggerClick}>
                             <Flex maxWidth="125px" height="100%" px="2" align="center"
                                 className={classNames("items-center px-2 text-sm cursor-pointer rounded-l-(--text-field-border-radius)", triggerClassNames)}
                             >
