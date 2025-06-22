@@ -9,7 +9,7 @@ services:
       - app-network
     volumes:
       - ./backend:/backend
-    command: uvicorn app:app --host 0.0.0.0 --port 9000 --reload
+    command: poetry run uvicorn app:app --host 0.0.0.0 --port 9000
 
   frontend:
     image: sunday-app
