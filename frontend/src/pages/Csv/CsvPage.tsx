@@ -212,7 +212,7 @@ const CsvPage = () => {
             return !paymentRegex.test(item.description) && !paymentTransferred.test(item.description);
         });
         const totalSum = lineItemsWithoutPayments.reduce((sum, item) => {
-            return sum + Math.abs(item.amount)
+            return sum + item.amount
         }, 0);
         setTotalSum(totalSum);
         setTotalTransactions(lineItemsWithoutPayments.length);
