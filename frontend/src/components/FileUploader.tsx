@@ -50,7 +50,11 @@ const FileUploader = React.forwardRef<HTMLInputElement, FileUploaderProps>(({
 
     return (
         <Flex gap="2" align="center">
-            {file && showUploadedFileName && <Text as="p" weight="light" className="text-(--accent-9)">Uploaded file: {file.name}</Text>}
+            {file && showUploadedFileName &&
+                <Text as="p" weight="light" className="text-(--accent-9)" truncate>
+                    Uploaded file: {file.name}
+                </Text>
+            }
             <Button variant="soft" radius="large" onClick={handleButtonClick} disabled={disabled}>
                 <UploadIcon /> {uploadBtnText}
             </Button>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { TouchEventHandler, useState } from "react";
 import { Box, Select, TextField, Text, Flex } from "@radix-ui/themes";
 import { Select as SelectPrimitive } from "radix-ui";
 import { CaretDownIcon } from "@radix-ui/react-icons";
@@ -56,7 +56,7 @@ const TypeableSelect = ({
         }
     }
 
-    const handleSelectTriggerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleSelectTriggerClick = (e: TouchEventHandler<HTMLButtonElement>) => {
         e.stopPropagation();
         setOpenChange(!open);
     };
