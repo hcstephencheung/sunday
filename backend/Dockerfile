@@ -16,5 +16,5 @@ RUN bash ./scripts/install-requirements.sh
 # Expose the port the app runs on
 EXPOSE 9000
 
-# Command to run the FastAPI server
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]
+# Command to run the FastAPI server using Poetry to ensure correct environment
+CMD ["poetry", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]
