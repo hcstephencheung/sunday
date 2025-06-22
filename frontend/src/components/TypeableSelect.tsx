@@ -63,7 +63,7 @@ const TypeableSelect = ({
 
     return (
         <Select.Root onValueChange={onSelectedOptionChange} value={defaultOption.value} open={open} onOpenChange={setOpenChange}>
-            <Box minWidth="240px">
+            <Box minWidth="240px" style={{ fontSize: '16px' }}>
                 <TextField.Root placeholder="Add a category..." value={textInput} onChange={handleTextInputChange} onKeyDown={handleTextInputKeydown}>
                     <TextField.Slot pl="0">
                         <SelectPrimitive.Trigger asChild onClick={handleSelectTriggerClick}>
