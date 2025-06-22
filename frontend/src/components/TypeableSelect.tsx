@@ -66,7 +66,7 @@ const TypeableSelect = ({
             <Box minWidth="240px" style={{ fontSize: '16px' }}>
                 <TextField.Root placeholder="Add a category..." value={textInput} onChange={handleTextInputChange} onKeyDown={handleTextInputKeydown}>
                     <TextField.Slot pl="0">
-                        <SelectPrimitive.Trigger asChild onClick={handleSelectTriggerClick}>
+                        <SelectPrimitive.Trigger asChild onTouchStart={handleSelectTriggerClick}>
                             <Flex maxWidth="125px" height="100%" px="2" align="center"
                                 className={classNames("items-center px-2 text-sm cursor-pointer rounded-l-(--text-field-border-radius)", triggerClassNames)}
                             >
