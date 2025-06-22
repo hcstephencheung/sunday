@@ -12,6 +12,7 @@ import isEqual from 'lodash/isEqual';
 import SumByCategoryTab from '../../components/SumByCategoryTab';
 import { isEmpty } from 'lodash';
 import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
+import TotalsCard from '../../components/TotalsCard';
 
 const CsvPage = () => {
     const params = new URLSearchParams(window.location.search);
@@ -22,6 +23,7 @@ const CsvPage = () => {
     const [categorizedLineItems, setCategorizedLineItems] = useState<CategorizedLineItem[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [sumByCategory, setSumByCategory] = useState<Record<string, number>>({});
+    const [totalSum, setTotalSum] = useState<number>(0);
     const [classifying, setClassifying] = useState<boolean>(false);
     const [uploading, setUploading] = useState<PdfStages>(PdfStages.DONE);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
@@ -202,6 +204,17 @@ const CsvPage = () => {
         setSumByCategory(roundedSummedCategories);
     }, [categorizedLineItems, glossary]);
 
+    React.useEffect(() => {
+        const totalSum = lineItems.filter(item => {
+            const paymentRegex = /^(?=.*PAYMENT)(?=.*THANK)(?=.*YOU).*/is;
+            const paymentTransferred = /^(?=.*PAYMENT)(?=.*FROM).*/is;
+            return !paymentRegex.test(item.description) && !paymentTransferred.test(item.description);
+        }).reduce((sum, item) => {
+            return sum + Math.abs(item.amount)
+        }, 0);
+        setTotalSum(totalSum);
+    }, [lineItems]);
+
     return (
         <Container width="100%" height="100%" p="4">
             <Heading as="h1" size="6" weight="light" mb="8">
@@ -258,6 +271,8 @@ const CsvPage = () => {
                     </>
                 )}
             </Flex>
+
+            {lineItems.length > 0 && <TotalsCard totalSum={totalSum} totalTransactions={lineItems.length} />}
 
             <Box width="100%" pb="6">
                 {/* Summed categories */}
