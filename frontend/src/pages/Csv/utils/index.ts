@@ -104,7 +104,13 @@ export const arrayDifference = <T>(biggerArray: T[], smallerArray: T[]): T[] => 
 export const sumCategories = (lineItems: Array<CategorizedLineItem>): Record<string, number> => {
     return lineItems.reduce((acc, item) => {
         const category = item.category;
-        acc[category] = (acc[category] || 0) + (item.amount * (item.debit ? 1 : -1));
+        let amount = item.amount;
+        if (amount > 0 && !item.debit) {
+            // if amount is positive but it's a credit, we might have an incorrect value
+            // so we force it to be negative
+            amount = -amount;
+        }
+        acc[category] = (acc[category] || 0) + amount;
         return acc;
     }, {} as Record<string, number>);
 };
