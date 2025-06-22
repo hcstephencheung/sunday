@@ -24,6 +24,7 @@ const CsvPage = () => {
     const [categories, setCategories] = useState<string[]>([]);
     const [sumByCategory, setSumByCategory] = useState<Record<string, number>>({});
     const [totalSum, setTotalSum] = useState<number>(0);
+    const [totalTransactions, setTotalTransactions] = useState<number>(0);
     const [classifying, setClassifying] = useState<boolean>(false);
     const [uploading, setUploading] = useState<PdfStages>(PdfStages.DONE);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
@@ -205,14 +206,16 @@ const CsvPage = () => {
     }, [categorizedLineItems, glossary]);
 
     React.useEffect(() => {
-        const totalSum = lineItems.filter(item => {
+        const lineItemsWithoutPayments = lineItems.filter(item => {
             const paymentRegex = /^(?=.*PAYMENT)(?=.*THANK)(?=.*YOU).*/is;
             const paymentTransferred = /^(?=.*PAYMENT)(?=.*FROM).*/is;
             return !paymentRegex.test(item.description) && !paymentTransferred.test(item.description);
-        }).reduce((sum, item) => {
+        });
+        const totalSum = lineItemsWithoutPayments.reduce((sum, item) => {
             return sum + Math.abs(item.amount)
         }, 0);
         setTotalSum(totalSum);
+        setTotalTransactions(lineItemsWithoutPayments.length);
     }, [lineItems]);
 
     return (
@@ -272,7 +275,7 @@ const CsvPage = () => {
                 )}
             </Flex>
 
-            {lineItems.length > 0 && <TotalsCard totalSum={totalSum} totalTransactions={lineItems.length} />}
+            {lineItems.length > 0 && <TotalsCard totalSum={totalSum} totalTransactions={totalTransactions} />}
 
             <Box width="100%" pb="6">
                 {/* Summed categories */}

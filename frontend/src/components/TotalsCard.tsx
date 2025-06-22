@@ -18,7 +18,7 @@ const TotalsCard = ({
 
             <Flex gap="2" align="center">
                 <Text size="6" weight="bold">
-                    Transactions
+                    Transactions <Text weight="light">(excluding payments)</Text>:
                 </Text>
                 <Text size="6" weight="light" color="green">
                     {totalTransactions}
