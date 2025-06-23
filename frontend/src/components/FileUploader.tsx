@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { UploadIcon } from "@radix-ui/react-icons"
-import { Button, Flex, Text } from "@radix-ui/themes"
+import { Box, Button, Flex, Text } from "@radix-ui/themes"
 
 export type TAcceptedFileType = '.csv' | '.txt' | '.pdf';
 type TExpectedFileTypes = 'text/csv' | 'text/plain' | 'application/pdf';
@@ -49,11 +49,11 @@ const FileUploader = React.forwardRef<HTMLInputElement, FileUploaderProps>(({
     }
 
     return (
-        <Flex gap="2" align="center">
+        <Flex gap="2" align="center" className="flex-wrap">
             {file && showUploadedFileName &&
-                <Text as="p" weight="light" className="text-(--accent-9)" truncate>
-                    Uploaded file: {file.name}
-                </Text>
+                <Box maxWidth="90vw">
+                    <Text as="div" weight="light" className="text-(--accent-9)" truncate>Uploaded file: {file.name}</Text>
+                </Box>
             }
             <Button variant="soft" radius="large" onClick={handleButtonClick} disabled={disabled}>
                 <UploadIcon /> {uploadBtnText}

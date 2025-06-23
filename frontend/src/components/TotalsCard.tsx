@@ -7,7 +7,7 @@ const TotalsCard = ({
 }) => {
     return (
         <Card my="4">
-            <Flex gap="2" align="center">
+            <Flex gap="2" align="center" justify="between">
                 <Text size="6" weight="bold">
                     Total <Text weight="light">(excluding payments)</Text>:
                 </Text>
@@ -16,7 +16,7 @@ const TotalsCard = ({
                 </Text>
             </Flex>
 
-            <Flex gap="2" align="center">
+            <Flex gap="2" align="center" justify="between">
                 <Text size="6" weight="bold">
                     Transactions <Text weight="light">(excluding payments)</Text>:
                 </Text>

@@ -234,7 +234,7 @@ const CsvPage = () => {
                     />
                 </Box>
 
-                <Box my="4" width="100%">
+                <Box my="4">
                     <Flex gap="2" align="center" mb="4">
                         <FileUploader
                             ref={uploadedFileInputRef}
