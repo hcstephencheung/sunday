@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Heading, Button, Spinner, Tabs, Box, Flex, Container } from '@radix-ui/themes';
+import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Switch } from '@radix-ui/themes';
 import { MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
+import { Toggle } from 'radix-ui';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
@@ -13,8 +14,10 @@ import SumByCategoryTab from '../../components/SumByCategoryTab';
 import { isEmpty } from 'lodash';
 import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
 import TotalsCard from '../../components/TotalsCard';
+import { DarkModeContext } from '../../main';
 
 const CsvPage = () => {
+    const { darkMode, setDarkMode } = React.useContext(DarkModeContext);
     const params = new URLSearchParams(window.location.search);
     const isBB = params.get('bb');
 
@@ -133,10 +136,8 @@ const CsvPage = () => {
             const newGlossary = Object.assign({}, glossary, aiClassifiedItems);
 
             const taggedLineItems = tagLineItemsWithClassification(sanitizedLineItems, newGlossary);
-            const categories = getCategoriesFromLineItems(taggedLineItems);
 
             setCategorizedLineItems(taggedLineItems);
-            setCategories(categories);
         }
         setClassifying(false);
     };
@@ -206,8 +207,18 @@ const CsvPage = () => {
     return (
         <Container width="100%" height="100%" p="4">
             <Heading as="h1" size="6" weight="light" mb="8">
-                <Flex gap="1" align="center">
-                    Sunday, the budgeting day <SunIcon />
+                <Flex gap="1" align="center" justify="between">
+                    <Flex gap="2" align="center">
+                        <Text size="6" weight="bold">
+                            <Text className="text-(--accent-11)">Sunday</Text> the budgeting day
+                        </Text>
+                        <SunIcon className="text-(--accent-9)" />
+                    </Flex>
+
+                    <Flex gap="2" align="center">
+                        <Text size="4" weight="light">{darkMode ? 'Dark' : 'Light'} mode</Text>
+                        <Switch checked={!darkMode} onCheckedChange={() => setDarkMode(!darkMode)} />
+                    </Flex>
                 </Flex>
             </Heading>
 
