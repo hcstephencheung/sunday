@@ -32,7 +32,7 @@ const TotalsCard = ({
         <Card my="4">
             <Flex gap="2" align="center" justify="between">
                 <Text size="6" weight="bold">
-                    Total {excludePayments && <Text weight="light">(excluding payments)</Text>}:
+                    Balance {excludePayments && <Text weight="light">(excluding payments)</Text>}:
                 </Text>
                 <Text size="6" weight="light" color="green">
                     ${totalSum.toFixed(2)}
