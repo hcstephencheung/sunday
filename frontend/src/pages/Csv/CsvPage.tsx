@@ -18,13 +18,11 @@ const CsvPage = () => {
     const params = new URLSearchParams(window.location.search);
     const isBB = params.get('bb');
 
-    const initialCategories = isBB !== null ? BB_CATEGORIES : DEFAULT_DESIRED_CATEGORIES;
+    const initialCategories = !!isBB ? BB_CATEGORIES : DEFAULT_DESIRED_CATEGORIES;
     const [lineItems, setLineItems] = useState<LineItem[]>([]);
     const [categorizedLineItems, setCategorizedLineItems] = useState<CategorizedLineItem[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [sumByCategory, setSumByCategory] = useState<Record<string, number>>({});
-    const [totalSum, setTotalSum] = useState<number>(0);
-    const [totalTransactions, setTotalTransactions] = useState<number>(0);
     const [classifying, setClassifying] = useState<boolean>(false);
     const [uploading, setUploading] = useState<PdfStages>(PdfStages.DONE);
     const [bank, setBank] = useState<Banks>(Banks.SCOTIABANK)
@@ -54,7 +52,7 @@ const CsvPage = () => {
                 const rows = text.split('\n').map(row => row.split(','));
                 const items = CsvTransformerByBank[bank](rows);
 
-                setLineItems(items);
+                setLineItems(sanitizeLineItems(items));
             };
             reader.readAsText(selectedFile);
         }
@@ -65,11 +63,11 @@ const CsvPage = () => {
                 setUploading(PdfStages.PROCESSING);
                 const pdfDataUrl = e.target?.result as string;
                 const onData = (inProgressLineItems: LineItem[]) => {
-                    setLineItems(inProgressLineItems);
+                    setLineItems(sanitizeLineItems(inProgressLineItems));
                 };
                 const onCompleted = (completedLineItems: LineItem[]) => {
                     if (!isEqual(lineItems, completedLineItems)) {
-                        setLineItems(completedLineItems);
+                        setLineItems(sanitizeLineItems(completedLineItems));
                     }
                     setUploading(PdfStages.DONE);
                 }
@@ -205,19 +203,6 @@ const CsvPage = () => {
         setSumByCategory(roundedSummedCategories);
     }, [categorizedLineItems, glossary]);
 
-    React.useEffect(() => {
-        const lineItemsWithoutPayments = lineItems.filter(item => {
-            const paymentRegex = /^(?=.*PAYMENT)(?=.*THANK)(?=.*YOU).*/is;
-            const paymentTransferred = /^(?=.*PAYMENT)(?=.*FROM).*/is;
-            return !paymentRegex.test(item.description) && !paymentTransferred.test(item.description);
-        });
-        const totalSum = lineItemsWithoutPayments.reduce((sum, item) => {
-            return sum + item.amount
-        }, 0);
-        setTotalSum(totalSum);
-        setTotalTransactions(lineItemsWithoutPayments.length);
-    }, [lineItems]);
-
     return (
         <Container width="100%" height="100%" p="4">
             <Heading as="h1" size="6" weight="light" mb="8">
@@ -275,7 +260,7 @@ const CsvPage = () => {
                 )}
             </Flex>
 
-            {lineItems.length > 0 && <TotalsCard totalSum={totalSum} totalTransactions={totalTransactions} />}
+            {lineItems.length > 0 && <TotalsCard lineItems={lineItems} />}
 
             <Box width="100%" pb="6">
                 {/* Summed categories */}
@@ -285,8 +270,8 @@ const CsvPage = () => {
                         <Tabs.Root defaultValue="LineItems" my="4">
                             <Tabs.List>
                                 <Tabs.Trigger value="LineItems">Line Items</Tabs.Trigger>
-                                <Tabs.Trigger value="Categories">Categories</Tabs.Trigger>
                                 <Tabs.Trigger value="SumByCategory">Sum By Category</Tabs.Trigger>
+                                <Tabs.Trigger value="Categories">Categories</Tabs.Trigger>
                                 <Tabs.Trigger value="Glossary">Glossary</Tabs.Trigger>
                             </Tabs.List>
 
@@ -300,14 +285,14 @@ const CsvPage = () => {
                                     />
                                 </Tabs.Content>
 
+                                <Tabs.Content value="SumByCategory">
+                                    <SumByCategoryTab data={sumByCategory} />
+                                </Tabs.Content>
+
                                 <Tabs.Content value="Categories">
                                     <Box width="100%">
                                         <DesiredCategories categories={categories} onCategoriesUpdate={handleCategoriesChanged} />
                                     </Box>
-                                </Tabs.Content>
-
-                                <Tabs.Content value="SumByCategory">
-                                    <SumByCategoryTab data={sumByCategory} />
                                 </Tabs.Content>
 
                                 <Tabs.Content value="Glossary">

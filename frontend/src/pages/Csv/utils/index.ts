@@ -158,10 +158,16 @@ export const exportSumsToCsv = (sumByCategory: Record<string, number>, filename 
 }
 
 export const sanitizeLineItems = (lineItems: LineItem[]) => {
-    return lineItems.map(lineItem => ({
-        ...lineItem,
-        description: lineItem.description.toLowerCase()
-    }))
+    return lineItems.map(lineItem => {
+        if (!lineItem.debit && lineItem.amount > 0) {
+            // auto-correct the amount to be negative
+            lineItem.amount = -lineItem.amount;
+        }
+        return {
+            ...lineItem,
+            description: lineItem.description.toLowerCase()
+        }
+    });
 }
 
 export const santizeClassifiedItems = (classifiedItems: ClassifiedItem) => {
