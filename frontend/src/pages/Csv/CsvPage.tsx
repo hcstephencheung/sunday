@@ -272,7 +272,7 @@ const CsvPage = () => {
                                 <Tabs.Trigger value="LineItems">Line Items</Tabs.Trigger>
                                 <Tabs.Trigger value="SumByCategory">Sum By Category</Tabs.Trigger>
                                 <Tabs.Trigger value="Categories">Categories</Tabs.Trigger>
-                                <Tabs.Trigger value="Glossary">Glossary</Tabs.Trigger>
+                                <Tabs.Trigger value="Definitions">Definitions</Tabs.Trigger>
                             </Tabs.List>
 
                             <Box overflow="scroll" my="4">
@@ -295,7 +295,7 @@ const CsvPage = () => {
                                     </Box>
                                 </Tabs.Content>
 
-                                <Tabs.Content value="Glossary">
+                                <Tabs.Content value="Definitions">
                                     <GlossaryTab
                                         glossary={glossary}
                                         categorizedLineItems={categorizedLineItems}

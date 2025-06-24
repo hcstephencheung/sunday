@@ -179,7 +179,7 @@ export const santizeClassifiedItems = (classifiedItems: ClassifiedItem) => {
     return sanitizedItems;
 }
 
-export const saveObjectAsTextFile = (obj: Record<string, string>, filename = 'smartbud_glossary.txt') => {
+export const saveObjectAsTextFile = (obj: Record<string, string>, filename = 'sunday_definitions.txt') => {
     // Validation: not empty, all keys and values are strings
     const keys = Object.keys(obj);
     if (keys.length === 0) {

@@ -30,5 +30,5 @@ export const DEFAULT_DESIRED_CATEGORIES = [
 ]
 export const UNCATEGORIZED = 'uncategorized';
 
-export const LOCAL_STORAGE_KEY = 'smartbud';
+export const LOCAL_STORAGE_KEY = 'sunday-budgeting';
 export const FILE_DELIMITER = '|||'
