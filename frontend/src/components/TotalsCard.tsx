@@ -30,27 +30,27 @@ const TotalsCard = ({
 
     return (
         <Card my="4">
-            <Flex gap="2" align="center" justify="between">
+            <Flex gap="2" align="baseline" justify="between">
                 <Text size="6" weight="bold">
-                    Balance {excludePayments && <Text weight="light">(excluding payments)</Text>}:
+                    Balance
                 </Text>
-                <Text size="6" weight="light" color="green">
+                <Text size="6" weight="light" className="text-(--accent-11)">
                     ${totalSum.toFixed(2)}
                 </Text>
             </Flex>
 
-            <Flex gap="2" my="2" align="center" justify="between">
+            <Flex gap="2" align="baseline" justify="between">
                 <Text size="6" weight="bold">
-                    Transactions {excludePayments && <Text weight="light">(excluding payments)</Text>}:
+                    Transactions
                 </Text>
-                <Text size="6" weight="light" color="green">
+                <Text size="6" weight="light" className="text-(--accent-11)">
                     {totalTransactions}
                 </Text>
             </Flex>
 
-            <Flex gap="2" align="center">
-                <Text size="4">Exclude payments </Text>
-                <Checkbox checked={excludePayments} onCheckedChange={handleCheckChanged} size="4" />
+            <Flex gap="2" align="center" mt="3">
+                <Text size="2">Exclude payments </Text>
+                <Checkbox checked={excludePayments} onCheckedChange={handleCheckChanged} />
             </Flex>
         </Card>
     )
