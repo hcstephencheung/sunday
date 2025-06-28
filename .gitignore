@@ -11,6 +11,7 @@ package-lock.json
 
 # Python
 __pycache__/
+logs.txt
 
 # IDEs and editors
 .vscode/

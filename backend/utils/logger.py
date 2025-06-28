@@ -1,6 +1,6 @@
 import logging
-import os
-import sys
+from logging.handlers import RotatingFileHandler
+
 
 def setup_logger():
     logger = logging.getLogger()  # root logger
@@ -10,20 +10,24 @@ def setup_logger():
     if logger.hasHandlers():
         logger.handlers.clear()
 
-    env = os.getenv("ENV", "development")  # Default to 'development' if ENV is not set
+    # Set up the rotating file handler
+    handler = RotatingFileHandler(
+        filename="logs.txt",  # Log file name
+        maxBytes=10 * 1024 * 1024,  # Max size in bytes (1 MB here)
+        backupCount=3,  # Number of rotated backups to keep (e.g., logs.txt.1, logs.txt.2, etc.)
+    )
+    # Set formatter
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    handler.setFormatter(formatter)
 
-    if env == "production":
-        import google.cloud.logging
-        from google.cloud.logging.handlers import CloudLoggingHandler
-        # GCP Cloud Logging setup
-        client = google.cloud.logging.Client()
-        handler = CloudLoggingHandler(client)
-        logger.addHandler(handler)
-    else:
-        # Local stdout setup
-        handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter('%(message)s')  # mimic print()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+    # Set up the logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
+    # Optional: also log to console
+    console = logging.StreamHandler()
+    console.setFormatter(formatter)
+    logger.addHandler(console)
 
     return logger

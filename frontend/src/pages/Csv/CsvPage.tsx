@@ -138,6 +138,11 @@ const CsvPage = () => {
             const taggedLineItems = tagLineItemsWithClassification(sanitizedLineItems, newGlossary);
 
             setCategorizedLineItems(taggedLineItems);
+            if (isEmpty(categories)) {
+                // if we don't have any categories, set them from the AI classified items
+                const newCategories = getCategoriesFromLineItems(taggedLineItems);
+                setCategories(newCategories);
+            }
         }
         setClassifying(false);
     };
