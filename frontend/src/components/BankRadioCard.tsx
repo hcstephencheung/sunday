@@ -40,22 +40,9 @@ export const BankRadioCard = ({
             </Text>
 
             <Blockquote my="2">
-                Contrary to the PDF method, CSV files are directly converted into line items and
-                does not use AI to extract the data. The direct conversion is more reliable as there
-                are no risks in hallucination or misinterpretation.
+                Unlike PDFs, CSV files are directly converted to line items without using AI, making them more reliable
+                and free from hallucination or misinterpretation risks.
             </Blockquote>
-
-            {/* <RadioCards.Root
-                defaultValue={bank}
-                onValueChange={handleBankChange}
-                variant="classic"
-            >
-                {Object.entries(Banks).map(([_, bankName], index) => (
-                    <RadioCards.Item key={index} value={bankName} className="w-full max-w-[160px]">
-                        <Text color={BankColors[bankName]}>{bankName}</Text>
-                    </RadioCards.Item>
-                ))}
-            </RadioCards.Root> */}
 
             <RadioGroup.Root
                 defaultValue={bank}
