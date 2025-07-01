@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Switch, Blockquote } from '@radix-ui/themes';
-import { MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
+import { DotFilledIcon, MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
@@ -282,8 +282,8 @@ const CsvPage = () => {
                             <Heading as="h2" mb="4" weight="light">
                                 Choose your method to categorize the line items.
                             </Heading>
-                            <Text as="p" weight="light">AI Categorize will use AI to classify the line items based on its description.</Text>
-                            <Text as="p" weight="light">Use previous definitions will prompt you to upload a text file you previously saved in the Definitions tab.</Text>
+                            <Text as="p" weight="light">• AI Categorize will use AI to classify the line items based on its description.</Text>
+                            <Text as="p" weight="light">• Use previous definitions will prompt you to upload a text file you previously saved in the Definitions tab.</Text>
                             <Blockquote weight="light" my="2">You need to categorize the line items in order to enbale the <Text className="text-(--accent-10)">"Sum By Category"</Text> and <Text className="text-(--accent-10)">"Definitions"</Text> tabs</Blockquote>
                         </Box>
 
