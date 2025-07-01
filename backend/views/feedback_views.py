@@ -37,11 +37,11 @@ async def submit_feedback(request: FeedbackRequest):
 
         # Prepare feedback content with metadata
         feedback_content = f"""Feedback ID: {feedback_id}
-            Timestamp: {datetime.now().isoformat()}
-            Character count: {len(feedback_text)}
-            ---
-            {feedback_text}
-            """
+Timestamp: {datetime.now().isoformat()}
+Character count: {len(feedback_text)}
+---
+{feedback_text}
+"""
 
         # Write feedback to file
         with open(filepath, "w", encoding="utf-8") as f:
