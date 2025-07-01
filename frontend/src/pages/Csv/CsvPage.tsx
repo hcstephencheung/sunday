@@ -15,6 +15,7 @@ import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
 import TotalsCard from '../../components/TotalsCard';
 import { useDarkMode } from '../../components/DarkMode';
 import BorderedSection from '../../components/BorderedSection';
+import FeedbackForm from '../../components/FeedbackForm';
 
 const CsvPage = () => {
     const { darkMode, setDarkMode } = useDarkMode();
@@ -220,9 +221,12 @@ const CsvPage = () => {
                         <SunIcon className="text-(--accent-9)" />
                     </Flex>
 
-                    <Flex gap="2" align="center">
-                        <Text size="4" weight="light">{darkMode ? 'Dark' : 'Light'} mode</Text>
-                        <Switch checked={!darkMode} onCheckedChange={() => setDarkMode(!darkMode)} />
+                    <Flex gap="4" align="center">
+                        <FeedbackForm />
+                        <Flex gap="2">
+                            <Text size="4" weight="light">{darkMode ? 'Dark' : 'Light'} mode</Text>
+                            <Switch checked={!darkMode} onCheckedChange={() => setDarkMode(!darkMode)} />
+                        </Flex>
                     </Flex>
                 </Flex>
             </Heading>
