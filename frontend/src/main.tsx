@@ -8,31 +8,7 @@ import {
   FourOhFourPage,
   CsvPage
 } from './pages';
-
-export type DarkModeContextType = {
-  darkMode: boolean;
-  setDarkMode: (darkMode: boolean) => void;
-};
-
-export const DarkModeContext = React.createContext<DarkModeContextType | undefined>(undefined);
-
-export const useDarkMode = () => {
-  const context = React.useContext(DarkModeContext);
-  if (!context) {
-    throw new Error('useDarkMode must be used within a DarkModeProvider');
-  }
-  return context;
-};
-
-export const DarkModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [darkMode, setDarkMode] = React.useState(false);
-  const value = React.useMemo(() => ({ darkMode, setDarkMode }), [darkMode]);
-  return (
-    <DarkModeContext.Provider value={value}>
-      {children}
-    </DarkModeContext.Provider>
-  );
-}
+import { DarkModeProvider, useDarkMode } from './components/DarkMode';
 
 const AppWithTheme = () => {
   const hour = new Date().getHours();

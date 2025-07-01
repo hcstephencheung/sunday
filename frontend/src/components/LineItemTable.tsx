@@ -14,7 +14,7 @@ interface LineItem {
 }
 
 const hasCategory = (lineItem: LineItem): boolean => {
-    return !!(lineItem.category && lineItem.category !== '');
+    return !!(lineItem && lineItem.category && lineItem.category !== '');
 }
 
 interface LineItemTableProps {

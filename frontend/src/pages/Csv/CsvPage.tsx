@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Switch } from '@radix-ui/themes';
+import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Switch, Separator, Blockquote, Quote } from '@radix-ui/themes';
 import { MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
-import { Toggle } from 'radix-ui';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
 import { BB_CATEGORIES, CategorizedLineItem, DEFAULT_DESIRED_CATEGORIES, Glossary, LineItem, UNCATEGORIZED } from './types';
@@ -14,10 +13,10 @@ import SumByCategoryTab from '../../components/SumByCategoryTab';
 import { isEmpty } from 'lodash';
 import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
 import TotalsCard from '../../components/TotalsCard';
-import { DarkModeContext } from '../../main';
+import { useDarkMode } from '../../components/DarkMode';
 
 const CsvPage = () => {
-    const { darkMode, setDarkMode } = React.useContext(DarkModeContext);
+    const { darkMode, setDarkMode } = useDarkMode();
     const params = new URLSearchParams(window.location.search);
     const isBB = params.get('bb');
 
@@ -227,37 +226,81 @@ const CsvPage = () => {
                 </Flex>
             </Heading>
 
-            <Box width="100%">
-                <Box>
-                    <BankRadioCard
-                        bank={bank}
-                        setBank={setBank}
-                    />
-                </Box>
+            {lineItems.length <= 0 && (
+                <>
+                    <Heading as="h2" mb="4" weight="light">
+                        To start, please export your credit card statement as CSV or PDF and upload it below.
+                    </Heading>
 
+                    <Box width="100%">
+                        <Tabs.Root defaultValue="PDF">
+                            <Tabs.List size="2">
+                                <Box width="50%">
+                                    <Flex align="center" gap="8">
+                                        <Tabs.Trigger value="PDF" className="text-center">PDF</Tabs.Trigger>
+                                        <Tabs.Trigger value="CSV" className="text-center">CSV</Tabs.Trigger>
+                                    </Flex>
+                                </Box>
+                            </Tabs.List>
+
+                            <Tabs.Content value="PDF">
+                                <Text as="p" my="4">
+                                    When uploading a PDF file, AI will try to extract the text from the PDF file. Please
+                                    use the balance amount and total transactions to verify if the AI extracted the data correctly.
+                                </Text>
+                                <FileUploader
+                                    ref={uploadedFileInputRef}
+                                    acceptedFileTypes={['.pdf'] as TAcceptedFileType[]}
+                                    handleFileChanged={handleUploadedFileChange}
+                                    uploadBtnText="Upload PDF"
+                                    showUploadedFileName
+                                />
+                                <PdfStagesGraphic stage={uploading} />
+                            </Tabs.Content>
+
+                            <Tabs.Content value="CSV">
+                                <BankRadioCard
+                                    bank={bank}
+                                    setBank={setBank}
+                                />
+                                <FileUploader
+                                    ref={uploadedFileInputRef}
+                                    acceptedFileTypes={['.csv'] as TAcceptedFileType[]}
+                                    handleFileChanged={handleUploadedFileChange}
+                                    uploadBtnText="Upload CSV"
+                                    showUploadedFileName
+                                />
+                            </Tabs.Content>
+                        </Tabs.Root>
+                    </Box>
+                </>
+            )}
+
+            {lineItems.length > 0 && (
                 <Box my="4">
-                    <Flex gap="2" align="center" mb="4">
-                        <FileUploader
-                            ref={uploadedFileInputRef}
-                            acceptedFileTypes={['.csv', '.pdf'] as TAcceptedFileType[]}
-                            handleFileChanged={handleUploadedFileChange}
-                            uploadBtnText="Upload CSV or PDF"
-                            showUploadedFileName
-                        />
-                    </Flex>
-                    <PdfStagesGraphic stage={uploading} />
-                </Box>
-            </Box>
+                    <Flex justify="between" wrap="wrap" gap="4">
+                        <Box>
+                            <Heading as="h2" mb="4" weight="light">
+                                Choose your method to categorize the line items.
+                            </Heading>
+                            <Text as="p" weight="light">AI Categorize will use AI to classify the line items based on its description.</Text>
+                            <Text as="p" weight="light">Use previous definitions will prompt you to upload a text file you previously saved in the Definitions tab.</Text>
+                        </Box>
 
-            <Heading as="h3" my="4">Your credit card statement</Heading>
+                        <Box>
+                            <Button onClick={() => resetEverything()} color="tomato">
+                                <ReloadIcon /> Start over
+                            </Button>
+                        </Box>
+                    </Flex>
+                </Box>
+            )}
+
             <Flex gap="2" width="100%" wrap="wrap">
-                <Button onClick={() => resetEverything()} color="tomato">
-                    <ReloadIcon /> Start over
-                </Button>
                 {lineItems.length > 0 && (
                     <>
                         <Button
-                            color="jade" variant="soft" radius="large"
+                            variant="soft" radius="large"
                             onClick={handleClassifyCsvClick}
                             disabled={classifying}
                         >
@@ -276,50 +319,40 @@ const CsvPage = () => {
                 )}
             </Flex>
 
-            {lineItems.length > 0 && <TotalsCard lineItems={lineItems} />}
-
             <Box width="100%" pb="6">
+                <Heading as="h3" my="4">Your credit card statement</Heading>
+                {lineItems.length > 0 && <TotalsCard lineItems={lineItems} />}
                 {/* Summed categories */}
-                {Object.keys(sumByCategory).length <= 0 ?
-                    lineItems.length > 0 && <LineItemTable lineItems={lineItems} />
-                    : (
-                        <Tabs.Root defaultValue="LineItems" my="4">
-                            <Tabs.List>
-                                <Tabs.Trigger value="LineItems">Line Items</Tabs.Trigger>
-                                <Tabs.Trigger value="SumByCategory">Sum By Category</Tabs.Trigger>
-                                <Tabs.Trigger value="Categories">Categories</Tabs.Trigger>
-                                <Tabs.Trigger value="Definitions">Definitions</Tabs.Trigger>
-                            </Tabs.List>
+                <Tabs.Root defaultValue="LineItems" my="4">
+                    <Tabs.List>
+                        <Tabs.Trigger value="LineItems">Line Items</Tabs.Trigger>
+                        <Tabs.Trigger value="SumByCategory" disabled={Object.keys(sumByCategory).length <= 0}>Sum By Category</Tabs.Trigger>
+                        <Tabs.Trigger value="Definitions" disabled={Object.keys(sumByCategory).length <= 0}>Definitions</Tabs.Trigger>
+                    </Tabs.List>
 
-                            <Box overflow="scroll" my="4">
-                                <Tabs.Content value="LineItems">
-                                    <LineItemTable
-                                        lineItems={categorizedLineItems}
-                                        updateLineItem={updateLineItem}
-                                        categories={categories}
-                                        onCategoriesChange={handleCategoriesChanged}
-                                    />
-                                </Tabs.Content>
+                    <Box overflow="scroll" my="4">
+                        <Tabs.Content value="LineItems">
+                            {Object.keys(sumByCategory).length > 0 && <DesiredCategories categories={categories} onCategoriesUpdate={handleCategoriesChanged} />}
+                            <LineItemTable
+                                lineItems={Object.keys(sumByCategory).length <= 0 ? lineItems : categorizedLineItems}
+                                updateLineItem={updateLineItem}
+                                categories={categories}
+                                onCategoriesChange={handleCategoriesChanged}
+                            />
+                        </Tabs.Content>
 
-                                <Tabs.Content value="SumByCategory">
-                                    <SumByCategoryTab data={sumByCategory} />
-                                </Tabs.Content>
+                        <Tabs.Content value="SumByCategory">
+                            <SumByCategoryTab data={sumByCategory ?? {}} />
+                        </Tabs.Content>
 
-                                <Tabs.Content value="Categories">
-                                    <Box width="100%">
-                                        <DesiredCategories categories={categories} onCategoriesUpdate={handleCategoriesChanged} />
-                                    </Box>
-                                </Tabs.Content>
-
-                                <Tabs.Content value="Definitions">
-                                    <GlossaryTab
-                                        glossary={glossary}
-                                        categorizedLineItems={categorizedLineItems}
-                                    />
-                                </Tabs.Content>
-                            </Box>
-                        </Tabs.Root>
-                    )}
+                        <Tabs.Content value="Definitions">
+                            <GlossaryTab
+                                glossary={glossary}
+                                categorizedLineItems={categorizedLineItems}
+                            />
+                        </Tabs.Content>
+                    </Box>
+                </Tabs.Root>
             </Box>
         </Container>
     )

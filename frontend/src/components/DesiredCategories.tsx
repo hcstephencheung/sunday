@@ -5,7 +5,8 @@ import React from 'react';
 const DesiredCategories: React.FC<{
     categories: string[];
     onCategoriesUpdate: (categories: string[]) => void;
-}> = ({ categories, onCategoriesUpdate }) => {
+    showAddCategoriesInput?: boolean;
+}> = ({ categories, onCategoriesUpdate, showAddCategoriesInput = false }) => {
     const [input, setInput] = React.useState('');
 
     const handleRemove = (idx: number) => {
@@ -50,22 +51,24 @@ const DesiredCategories: React.FC<{
                     </span>
                 ))}
             </div>
-            <Box width="100%" maxWidth="760px" minWidth="100px">
-                <TextField.Root placeholder="Add category..." value={input} onChange={handleInputChange} onKeyDown={handleInputKeyDown}>
-                    <TextField.Slot pr="3">
-                        <IconButton variant="ghost" onClick={handleAddCategory} disabled={!input.trim()}>
-                            <PlusIcon />
-                        </IconButton>
-                    </TextField.Slot>
-                    <TextField.Slot>
-                        <Tooltip content="Clear all">
-                            <IconButton variant="ghost" onClick={handleRemoveAll} color="crimson">
-                                <Cross1Icon />
+            {showAddCategoriesInput && (
+                <Box width="100%" maxWidth="760px" minWidth="100px">
+                    <TextField.Root placeholder="Add category..." value={input} onChange={handleInputChange} onKeyDown={handleInputKeyDown}>
+                        <TextField.Slot pr="3">
+                            <IconButton variant="ghost" onClick={handleAddCategory} disabled={!input.trim()}>
+                                <PlusIcon />
                             </IconButton>
-                        </Tooltip>
-                    </TextField.Slot>
-                </TextField.Root>
-            </Box>
+                        </TextField.Slot>
+                        <TextField.Slot>
+                            <Tooltip content="Clear all">
+                                <IconButton variant="ghost" onClick={handleRemoveAll} color="crimson">
+                                    <Cross1Icon />
+                                </IconButton>
+                            </Tooltip>
+                        </TextField.Slot>
+                    </TextField.Root>
+                </Box>
+            )}
         </div >
     );
 };
