@@ -15,13 +15,13 @@ const AppWithTheme = () => {
   const isDarkMode = (hour >= 7 && hour < 20) ? false : true;
   const { darkMode } = useDarkMode();
   const [appearance, setAppearance] = React.useState(isDarkMode ? 'dark' : 'light');
-  const [accentColor, setAccentColor] = React.useState(isDarkMode ? 'jade' : 'indigo');
+  const [accentColor, setAccentColor] = React.useState(isDarkMode ? 'yellow' : 'indigo');
   const [grayColor, setGrayColor] = React.useState(isDarkMode ? 'gray' : 'slate');
 
   React.useEffect(() => {
     if (darkMode) {
       setAppearance('dark');
-      setAccentColor('jade');
+      setAccentColor('yellow');
       setGrayColor('gray');
     } else {
       setAppearance('light');

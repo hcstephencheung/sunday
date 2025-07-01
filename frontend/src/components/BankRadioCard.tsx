@@ -66,10 +66,10 @@ export const BankRadioCard = ({
                     {Object.entries(Banks).map(([_, bankName], index) => (
                         <RadioGroup.Item key={index} value={bankName} asChild id={bankName}>
                             <div className={classNames(
-                                'py-2 px-4 my-2 rounded-lg bg-(--white) border border-solid shadow-sm transition-all duration-200 cursor-pointer hover:shadow-md hover:border-(--accent-5)',
+                                'py-2 px-4 my-2 rounded-lg bg-(--white) border border-solid shadow-sm transition-all duration-200 cursor-pointer hover:shadow-md',
                                 {
                                     'border-(--accent-9)': bank === bankName,
-                                    'border-transparent': bank !== bankName
+                                    'border-transparent hover:border-(--accent-5)': bank !== bankName
                                 }
                             )}>
                                 <Text color={BankColors[bankName]} htmlFor={bankName}>{bankName}</Text>

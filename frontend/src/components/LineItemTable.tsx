@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Table } from '@radix-ui/themes';
 import TypeableSelect, { TypeableSelectOption } from './TypeableSelect';
 import { CategorizedLineItem, UNCATEGORIZED } from '../pages/Csv/types';

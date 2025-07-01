@@ -14,6 +14,7 @@ import { isEmpty } from 'lodash';
 import PdfStagesGraphic, { PdfStages } from '../../components/PdfStagesGraphic';
 import TotalsCard from '../../components/TotalsCard';
 import { useDarkMode } from '../../components/DarkMode';
+import BorderedSection from '../../components/BorderedSection';
 
 const CsvPage = () => {
     const { darkMode, setDarkMode } = useDarkMode();
@@ -226,58 +227,56 @@ const CsvPage = () => {
                 </Flex>
             </Heading>
 
-            {lineItems.length <= 0 && (
-                <>
-                    <Heading as="h2" mb="4" weight="light">
-                        To start, please export your credit card statement as CSV or PDF and upload it below.
-                    </Heading>
+            <BorderedSection className="my-4 pl-4">
+                <Heading as="h2" mb="4" weight="light">
+                    To start, please export your credit card statement as CSV or PDF and upload it below.
+                </Heading>
 
-                    <Box width="100%">
-                        <Tabs.Root defaultValue="PDF">
-                            <Tabs.List size="2">
-                                <Box width="50%">
-                                    <Flex align="center" gap="8">
-                                        <Tabs.Trigger value="PDF" className="text-center">PDF</Tabs.Trigger>
-                                        <Tabs.Trigger value="CSV" className="text-center">CSV</Tabs.Trigger>
-                                    </Flex>
-                                </Box>
-                            </Tabs.List>
+                <Box width="100%">
+                    <Tabs.Root defaultValue="PDF">
+                        <Tabs.List size="2">
+                            <Box width="50%">
+                                <Flex align="center" gap="8">
+                                    <Tabs.Trigger value="PDF" className="text-center">PDF</Tabs.Trigger>
+                                    <Tabs.Trigger value="CSV" className="text-center">CSV</Tabs.Trigger>
+                                </Flex>
+                            </Box>
+                        </Tabs.List>
 
-                            <Tabs.Content value="PDF">
-                                <Text as="p" my="4">
-                                    When uploading a PDF file, AI will try to extract the text from the PDF file. Please
-                                    use the balance amount and total transactions to verify if the AI extracted the data correctly.
-                                </Text>
-                                <FileUploader
-                                    ref={uploadedFileInputRef}
-                                    acceptedFileTypes={['.pdf'] as TAcceptedFileType[]}
-                                    handleFileChanged={handleUploadedFileChange}
-                                    uploadBtnText="Upload PDF"
-                                    showUploadedFileName
-                                />
-                                <PdfStagesGraphic stage={uploading} />
-                            </Tabs.Content>
+                        <Tabs.Content value="PDF">
+                            <Text as="p" my="4">
+                                When uploading a PDF file, AI will try to extract the text from the PDF file. Please
+                                use the balance amount and total transactions to verify if the AI extracted the data correctly.
+                            </Text>
+                            <FileUploader
+                                ref={uploadedFileInputRef}
+                                acceptedFileTypes={['.pdf'] as TAcceptedFileType[]}
+                                handleFileChanged={handleUploadedFileChange}
+                                uploadBtnText="Upload PDF"
+                                showUploadedFileName
+                            />
+                            <PdfStagesGraphic stage={uploading} />
+                        </Tabs.Content>
 
-                            <Tabs.Content value="CSV">
-                                <BankRadioCard
-                                    bank={bank}
-                                    setBank={setBank}
-                                />
-                                <FileUploader
-                                    ref={uploadedFileInputRef}
-                                    acceptedFileTypes={['.csv'] as TAcceptedFileType[]}
-                                    handleFileChanged={handleUploadedFileChange}
-                                    uploadBtnText="Upload CSV"
-                                    showUploadedFileName
-                                />
-                            </Tabs.Content>
-                        </Tabs.Root>
-                    </Box>
-                </>
-            )}
+                        <Tabs.Content value="CSV">
+                            <BankRadioCard
+                                bank={bank}
+                                setBank={setBank}
+                            />
+                            <FileUploader
+                                ref={uploadedFileInputRef}
+                                acceptedFileTypes={['.csv'] as TAcceptedFileType[]}
+                                handleFileChanged={handleUploadedFileChange}
+                                uploadBtnText="Upload CSV"
+                                showUploadedFileName
+                            />
+                        </Tabs.Content>
+                    </Tabs.Root>
+                </Box>
+            </BorderedSection>
 
             {lineItems.length > 0 && (
-                <Box my="4">
+                <BorderedSection className="my-4 pl-4">
                     <Flex justify="between" wrap="wrap" gap="4">
                         <Box>
                             <Heading as="h2" mb="4" weight="light">
@@ -287,20 +286,15 @@ const CsvPage = () => {
                             <Text as="p" weight="light">Use previous definitions will prompt you to upload a text file you previously saved in the Definitions tab.</Text>
                         </Box>
 
-                        <Box>
+                        <Box mb="4">
                             <Button onClick={() => resetEverything()} color="tomato">
                                 <ReloadIcon /> Start over
                             </Button>
                         </Box>
                     </Flex>
-                </Box>
-            )}
-
-            <Flex gap="2" width="100%" wrap="wrap">
-                {lineItems.length > 0 && (
-                    <>
+                    <Flex gap="2" width="100%" wrap="wrap" my="2">
                         <Button
-                            variant="soft" radius="large"
+                            variant="soft" radius="large" color="iris"
                             onClick={handleClassifyCsvClick}
                             disabled={classifying}
                         >
@@ -315,11 +309,12 @@ const CsvPage = () => {
                             uploadBtnText="Use previous definitions"
                             showUploadedFileName={false}
                         />
-                    </>
-                )}
-            </Flex>
+                    </Flex>
+                </BorderedSection>
+            )}
 
-            <Box width="100%" pb="6">
+
+            <BorderedSection className="my-4 pl-4">
                 <Heading as="h3" my="4">Your credit card statement</Heading>
                 {lineItems.length > 0 && <TotalsCard lineItems={lineItems} />}
                 {/* Summed categories */}
@@ -353,7 +348,7 @@ const CsvPage = () => {
                         </Tabs.Content>
                     </Box>
                 </Tabs.Root>
-            </Box>
+            </BorderedSection>
         </Container>
     )
 }

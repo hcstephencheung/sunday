@@ -3,6 +3,7 @@ import { Box, Select, TextField, Text, Flex } from "@radix-ui/themes";
 import { Select as SelectPrimitive } from "radix-ui";
 import { CaretDownIcon } from "@radix-ui/react-icons";
 import classNames from "classnames";
+import { useDarkMode } from "./DarkMode";
 
 export interface TypeableSelectOption {
     label: string;
@@ -31,6 +32,8 @@ const TypeableSelect = ({
 }: TypeableSelectProps) => {
     const [textInput, setTextInput] = useState('');
     const [open, setOpenChange] = useState(false);
+
+    const { darkMode } = useDarkMode();
 
     const handleTextInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTextInput(e.target.value);
@@ -70,7 +73,10 @@ const TypeableSelect = ({
                             <Flex maxWidth="125px" height="100%" px="2" align="center"
                                 className={classNames("items-center px-2 text-sm cursor-pointer rounded-l-(--text-field-border-radius)", triggerClassNames)}
                             >
-                                <Text truncate>
+                                <Text truncate className={classNames({
+                                    'text-black': darkMode,
+                                    'text-white': !darkMode,
+                                })}>
                                     {defaultOption.value}
                                 </Text>
                                 <CaretDownIcon />
@@ -80,7 +86,7 @@ const TypeableSelect = ({
                 </TextField.Root>
             </Box >
 
-            <Select.Content position="popper" side="bottom" color={selectionColor}>
+            <Select.Content position="popper" side="bottom" color={selectionColor} highContrast>
                 {options.map((option, idx) => {
                     let annotatedProps = {};
                     if (annotationOptionFn && typeof annotationOptionFn === 'function') {
