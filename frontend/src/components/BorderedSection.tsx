@@ -1,3 +1,4 @@
+import "./BorderedSection.css";
 import classNames from "classnames";
 import React from "react";
 import { useDarkMode } from "./DarkMode";
@@ -7,10 +8,10 @@ const BorderedSection: React.FC<{
     className?: string;
 }> = ({ children, className }) => {
     const { darkMode } = useDarkMode();
-    const borderColor = darkMode ? 'accent' : 'blue';
+    const borderColor = darkMode ? 'yellow' : 'iris';
 
     return (
-        <div className={classNames(`border-l-1 border-l-(--${borderColor}-5)`, className)}>
+        <div className={classNames('bordered-section', className, borderColor)}>
             {children}
         </div>
     );

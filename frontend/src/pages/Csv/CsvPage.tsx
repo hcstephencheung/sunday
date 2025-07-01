@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Switch, Separator, Blockquote, Quote } from '@radix-ui/themes';
+import { Heading, Button, Spinner, Tabs, Box, Flex, Container, Text, Switch, Blockquote } from '@radix-ui/themes';
 import { MagicWandIcon, ReloadIcon, SunIcon } from '@radix-ui/react-icons';
 import DesiredCategories from '../../components/DesiredCategories';
 import LineItemTable from '../../components/LineItemTable';
@@ -284,6 +284,7 @@ const CsvPage = () => {
                             </Heading>
                             <Text as="p" weight="light">AI Categorize will use AI to classify the line items based on its description.</Text>
                             <Text as="p" weight="light">Use previous definitions will prompt you to upload a text file you previously saved in the Definitions tab.</Text>
+                            <Blockquote weight="light" my="2">You need to categorize the line items in order to enbale the <Text className="text-(--accent-10)">"Sum By Category"</Text> and <Text className="text-(--accent-10)">"Definitions"</Text> tabs</Blockquote>
                         </Box>
 
                         <Box mb="4">

@@ -1,0 +1,12 @@
+.bordered-section {
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+
+.bordered-section.yellow {
+    border-color: var(--yellow-10);
+}
+
+.bordered-section.iris {
+    border-color: var(--iris-8);
+}
