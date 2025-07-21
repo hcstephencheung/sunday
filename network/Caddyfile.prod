@@ -1,5 +1,5 @@
 sunday.scheung.dev {
-    encode
+  encode
 
 	handle /api/* {
 		reverse_proxy backend:9000

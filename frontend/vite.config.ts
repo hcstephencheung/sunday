@@ -10,10 +10,10 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     allowedHosts: ['sunday.scheung.dev'],
-    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3001,
     proxy: {
       '/api': {
-        target: 'http://backend:9000', // Backend server
+        target: 'http://backend:9001', // Backend server
         changeOrigin: true,
         rewrite: (path) => path, // Ensures /api is not stripped
       },
