@@ -9,14 +9,17 @@ Copy `.env.example` to `.env` to start; `.env` is git-ignored and must never be 
 
 ## Local URL (dev)
 
-**In dev mode, open Sunday at <https://sunday.localhost:8443>.** It's no longer at `https://sunday.localhost`.
+**In dev mode, open Sunday at <https://sunday.localhost:28001>.** It's no longer at `https://sunday.localhost`.
 
-The dev stack publishes a single port, bound to `127.0.0.1` only, so it can run next to other local stacks that use ports 80 and 443:
+The dev stack uses Sunday's fixed local ports, bound to `127.0.0.1` only, so it can run next to other local stacks:
 
 | What | Host port |
 | --- | --- |
-| Caddy, HTTPS (`sunday.localhost`) | `127.0.0.1:8443` (change it with `SUNDAY_HTTPS_PORT` in `.env`) |
+| Caddy, HTTPS (`sunday.localhost`) | `127.0.0.1:28001` |
+| Caddy, HTTP (redirects to HTTPS on 28001) | `127.0.0.1:18001` |
 | Frontend (Vite, 3000) and backend (uvicorn, 9000) | not published. Caddy reaches them over the Compose network |
+
+Caddy listens on the same port numbers inside its container (`http_port`/`https_port` in `network/Caddyfile.dev`), so its HTTP→HTTPS redirect points at 28001, not 443.
 
 Nothing in the dev stack listens on `0.0.0.0` or a LAN address. To reach the backend or frontend directly, use `docker compose -f docker-compose.dev.yml exec backend …` (or `exec frontend …`).
 

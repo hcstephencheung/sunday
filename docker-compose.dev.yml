@@ -1,8 +1,8 @@
 version: '3.8'
 
-# Development stack. Everything is published on loopback only, on ports that
-# don't clash with other local stacks: open https://sunday.localhost:8443
-# (or the port set in SUNDAY_HTTPS_PORT).
+# Development stack. Everything is published on loopback only, on Sunday's
+# fixed local ports (18001 HTTP, 28001 HTTPS), so it can run next to other
+# local stacks: open https://sunday.localhost:28001
 # Caddy reaches the backend and frontend over app-network, so their ports are
 # not published on the host.
 
@@ -34,7 +34,9 @@ services:
   caddy:
     image: caddy:2
     ports:
-      - "127.0.0.1:${SUNDAY_HTTPS_PORT:-8443}:443"
+      # Same port numbers inside and out; see the global options in Caddyfile.dev.
+      - "127.0.0.1:18001:18001"
+      - "127.0.0.1:28001:28001"
     environment:
       TAILNET_HOST: ${TAILNET_HOST:-tailnet.invalid}
     networks:

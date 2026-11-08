@@ -40,6 +40,6 @@ else
     fi
     docker compose -f "$COMPOSE_FILE" "${PROFILE_ARGS[@]}" up --build -d
     if [ "$ENV" != "prod" ]; then
-        echo "Sunday is at https://sunday.localhost:${SUNDAY_HTTPS_PORT:-8443}"
+        echo "Sunday is at https://sunday.localhost:28001"
     fi
 fi
