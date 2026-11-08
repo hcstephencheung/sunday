@@ -1,6 +1,49 @@
-sunday.localhost {
+# Local ports are fixed per project so several stacks can run on one host.
+# Caddy listens on them inside the container and docker-compose.dev.yml
+# publishes them 1:1 on 127.0.0.1.
+#
+# Caddy's automatic HTTP->HTTPS redirect leaves out the port when it equals
+# https_port (it assumes 443 is forwarded to it), which would send browsers to
+# https://sunday.localhost/. So it is disabled, and the redirect below keeps
+# the port: http://sunday.localhost:18001 -> https://sunday.localhost:28001
+{
+    http_port 18001
+    https_port 28001
+    auto_https disable_redirects
+}
+
+http://sunday.localhost:18001 {
+    redir https://{host}:28001{uri} 308
+}
+
+(sunday_routes) {
     reverse_proxy /* frontend:3000
     reverse_proxy /api/* backend:9000
+}
+
+# Local access: https://sunday.localhost:28001 (published on 127.0.0.1 only).
+sunday.localhost {
+    import sunday_routes
+
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}
+
+# Tailnet access. Plain HTTP, not published on the host: only the tailscale
+# container reaches it over app-network (see network/tailscale-serve.json),
+# which terminates HTTPS for https://<TAILNET_HOST>. Anything that doesn't ask
+# for TAILNET_HOST gets a 403.
+http://:8480 {
+    @tailnet host {$TAILNET_HOST:tailnet.invalid}
+    handle @tailnet {
+        import sunday_routes
+    }
+    handle {
+        respond "Forbidden" 403
+    }
 
     log {
         output stdout

@@ -2,6 +2,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+// Hosts the dev server answers to: the public domain, the local Caddy site and,
+// when remote access is set up, the tailnet name (TAILNET_HOST, passed in by
+// docker-compose.dev.yml).
+const allowedHosts = ['sunday.scheung.dev', 'sunday.localhost'];
+if (process.env.TAILNET_HOST) {
+  allowedHosts.push(process.env.TAILNET_HOST);
+}
+
 export default defineConfig({
   plugins: [
     react(),
@@ -9,7 +17,7 @@ export default defineConfig({
   ],
   server: {
     host: '0.0.0.0',
-    allowedHosts: ['sunday.scheung.dev'],
+    allowedHosts,
     port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
     proxy: {
       '/api': {
