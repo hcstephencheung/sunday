@@ -1,6 +1,31 @@
-sunday.localhost {
+(sunday_routes) {
     reverse_proxy /* frontend:3000
     reverse_proxy /api/* backend:9000
+}
+
+# Local access: https://sunday.localhost:8443 (published on 127.0.0.1 only).
+sunday.localhost {
+    import sunday_routes
+
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}
+
+# Tailnet access. Plain HTTP, not published on the host: only the tailscale
+# container reaches it over app-network (see network/tailscale-serve.json),
+# which terminates HTTPS for https://<TAILNET_HOST>. Anything that doesn't ask
+# for TAILNET_HOST gets a 403.
+http://:8480 {
+    @tailnet host {$TAILNET_HOST:tailnet.invalid}
+    handle @tailnet {
+        import sunday_routes
+    }
+    handle {
+        respond "Forbidden" 403
+    }
 
     log {
         output stdout
